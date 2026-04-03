@@ -1,30 +1,41 @@
-import { useState, useEffect, useCallback } from 'react'
-import { Link } from 'react-router-dom'
-import { useTranslation } from 'react-i18next'
-import { personsApi } from '../api'
-import { useAuth } from '../hooks/useAuth'
+// frontend/src/pages/AdminPage.jsx
+import { useState, useEffect, useCallback } from 'react';
+import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { personsApi } from '../api';
+import { useAuth } from '../hooks/useAuth';
+import Pagination from '../components/Pagination';
+
+const PAGE_SIZE = 20;
 
 export default function AdminPage() {
-  const { t } = useTranslation()
-  const { user } = useAuth()
-  const [persons, setPersons] = useState([])
-  const [loading, setLoading] = useState(true)
+  const { t } = useTranslation();
+  const { user } = useAuth();
+  const [persons, setPersons] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (p = 1) => {
+    setLoading(true);
     try {
-      const { data } = await personsApi.list({ status: 'pending', limit: 50 })
-      setPersons(data.items)
+      const { data } = await personsApi.list({ status: 'pending', page: p, limit: PAGE_SIZE });
+      setPersons(data.items);
+      setTotal(data.total);
+      setPage(p);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }, [])
+  }, []);
 
-  useEffect(() => { load() }, [load])
+  useEffect(() => { load(1) }, [load]);
 
   const setStatus = async (id, status) => {
-    await personsApi.setStatus(id, status)
-    load()
-  }
+    await personsApi.setStatus(id, status);
+    load(page);
+  };
+
+  const totalPages = Math.ceil(total / PAGE_SIZE);
 
   if (!user || user.role === 'user') {
     return (
@@ -32,24 +43,22 @@ export default function AdminPage() {
         <div className="text-4xl mb-3 opacity-30">🔒</div>
         <p className="font-serif text-lg text-slate-400">Доступ запрещён</p>
       </div>
-    )
+    );
   }
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 space-y-6">
-      {/* Header */}
       <div className="flex items-end justify-between">
         <div>
           <h1 className="font-serif text-2xl font-bold text-primary-800">{t('admin.title')}</h1>
           <p className="text-sm text-slate-400 mt-1">
-            {t('admin.pending')}:{' '}
-            <strong className="text-slate-600">{persons.length}</strong>
+            {t('admin.pending')}: <strong className="text-slate-600">{total}</strong>
           </p>
         </div>
-        {persons.length > 0 && (
+        {total > 0 && (
           <div className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 border border-amber-200 rounded-full">
             <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
-            <span className="text-xs font-semibold text-amber-700">{persons.length} ожидают проверки</span>
+            <span className="text-xs font-semibold text-amber-700">{total} ожидают проверки</span>
           </div>
         )}
       </div>
@@ -73,9 +82,7 @@ export default function AdminPage() {
         <div className="space-y-3">
           {persons.map(p => (
             <div key={p.id} className="card p-5 flex items-center gap-5 animate-fade-in">
-              {/* Left accent */}
               <div className="w-0.5 h-12 bg-amber-300 rounded-full shrink-0" />
-
               <div className="flex-1 min-w-0">
                 <Link
                   to={`/persons/${p.id}`}
@@ -90,7 +97,6 @@ export default function AdminPage() {
                   Добавлено: {new Date(p.created_at).toLocaleDateString('ru-RU')}
                 </p>
               </div>
-
               <div className="flex gap-2 shrink-0">
                 <button
                   onClick={() => setStatus(p.id, 'verified')}
@@ -107,8 +113,15 @@ export default function AdminPage() {
               </div>
             </div>
           ))}
+          {totalPages > 1 && (
+            <Pagination
+              currentPage={page}
+              totalPages={totalPages}
+              onPageChange={load}
+            />
+          )}
         </div>
       )}
     </div>
-  )
+  );
 }

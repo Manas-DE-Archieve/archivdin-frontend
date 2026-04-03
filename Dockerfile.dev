@@ -1,3 +1,5 @@
+# frontend/Dockerfile.dev
+
 # Использовать базовый образ Node.js
 FROM node:20-alpine
 
@@ -17,6 +19,5 @@ COPY . .
 EXPOSE 3000
 
 # Команда для запуска dev-сервера Vite.
-# '--host 0.0.0.0' нужен, чтобы сервер был доступен извне контейнера.
-# '--port 3000' нужен, чтобы соответствовать настройке в docker-compose.yml
-CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0", "--port", "3000"]
+# Vite сам подхватит настройки хоста и порта из vite.config.js
+CMD ["npm", "run", "dev"]
