@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useSearchParams } from 'react-router-dom';
 import { documentsApi } from '../api';
 import FileUploader from '../components/FileUploader';
 import { useAuth } from '../hooks/useAuth';
@@ -18,12 +19,13 @@ const STATUS_STYLES = {
 export default function DocumentsPage() {
   const { t } = useTranslation();
   const { user } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [docs, setDocs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [viewingDoc, setViewingDoc] = useState(null);
-  const [scope, setScope] = useState('all'); // 'all' or 'my'
+  const [scope, setScope] = useState('all');
 
   const load = useCallback(async (p = 1, currentScope) => {
     setLoading(true);
@@ -68,6 +70,16 @@ export default function DocumentsPage() {
       setViewingDoc(null);
     }
   };
+
+  // Auto-open document if ?view=ID is in URL (after handleViewDoc is defined)
+  useEffect(() => {
+    const viewId = searchParams.get('view');
+    if (viewId) {
+      handleViewDoc(viewId);
+      setSearchParams({}, { replace: true });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleUploaded = () => {
     // After upload, switch to 'my' tab to see the new document

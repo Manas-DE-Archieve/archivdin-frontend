@@ -47,6 +47,10 @@ export const personsApi = {
   },
 };
 
+export const factsApi = {
+  get: () => api.get('/facts'),
+};
+
 export const documentsApi = {
   checkDuplicates: (file) => {
     const formData = new FormData();
