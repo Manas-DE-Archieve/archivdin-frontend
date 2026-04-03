@@ -56,8 +56,7 @@ export default function PersonPage() {
     </div>
   )
 
-  const canEdit   = user && (user.role !== 'user' || user.id === person.created_by)
-  const canDelete = user && ['moderator', 'admin'].includes(user.role)
+  const canDelete = user && ['moderator', 'super_admin'].includes(user.role)
 
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 animate-fade-in">
@@ -98,13 +97,13 @@ export default function PersonPage() {
         {/* Body */}
         <div className="p-7">
           <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-5">
-            <Field label={t('person.region')}           value={person.region} />
-            <Field label={t('person.district')}         value={person.district} />
-            <Field label={t('person.occupation')}       value={person.occupation} />
-            <Field label={t('person.charge')}           value={person.charge} />
-            <Field label={t('person.arrestDate')}       value={person.arrest_date} />
-            <Field label={t('person.sentence')}         value={person.sentence} />
-            <Field label={t('person.sentenceDate')}     value={person.sentence_date} />
+            <Field label={t('person.region')} value={person.region} />
+            <Field label={t('person.district')} value={person.district} />
+            <Field label={t('person.occupation')} value={person.occupation} />
+            <Field label={t('person.charge')} value={person.charge} />
+            <Field label={t('person.arrestDate')} value={person.arrest_date} />
+            <Field label={t('person.sentence')} value={person.sentence} />
+            <Field label={t('person.sentenceDate')} value={person.sentence_date} />
             <Field label={t('person.rehabilitationDate')} value={person.rehabilitation_date} />
           </dl>
 
@@ -123,21 +122,14 @@ export default function PersonPage() {
             </div>
           )}
 
-          {(canEdit || canDelete) && (
+          {canDelete && (
             <div className="flex gap-3 mt-7 pt-7 border-t border-slate-100">
-              {canEdit && (
-                <Link to={`/persons/${id}/edit`} className="btn-outline">
-                  ✏ {t('person.edit')}
-                </Link>
-              )}
-              {canDelete && (
-                <button
-                  onClick={handleDelete}
-                  className="btn-outline !text-red-600 !border-red-200 hover:!bg-red-50"
-                >
-                  🗑 {t('person.delete')}
-                </button>
-              )}
+              <button
+                onClick={handleDelete}
+                className="btn-outline !text-red-600 !border-red-200 hover:!bg-red-50"
+              >
+                🗑 {t('person.delete')}
+              </button>
             </div>
           )}
         </div>

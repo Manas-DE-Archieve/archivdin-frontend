@@ -1,18 +1,18 @@
-// frontend/src/pages/DocumentsPage.jsx
 import { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { documentsApi } from '../api';
 import FileUploader from '../components/FileUploader';
 import { useAuth } from '../hooks/useAuth';
 import Pagination from '../components/Pagination';
-import DocumentViewerModal from '../components/DocumentViewerModal'; // <-- Импортируем модалку
+import DocumentViewerModal from '../components/DocumentViewerModal';
 
 const PAGE_SIZE = 10;
 const TYPE_ICON = { pdf: '📕', md: '📝', txt: '📄' };
-const TYPE_COLOR = {
-  pdf: 'bg-red-50 text-red-700 ring-1 ring-red-200',
-  md: 'bg-blue-50 text-blue-700 ring-1 ring-blue-200',
-  txt: 'bg-slate-100 text-slate-600 ring-1 ring-slate-200',
+const STATUS_STYLES = {
+  pending: { label: 'Ожидает', class: 'badge-pending' },
+  processing: { label: 'В обработке', class: 'badge-pending animate-pulse' },
+  processed: { label: 'Обработан', class: 'badge-verified' },
+  failed_extraction: { label: 'Ошибка ИИ', class: 'badge-rejected' },
 };
 
 export default function DocumentsPage() {
@@ -22,46 +22,92 @@ export default function DocumentsPage() {
   const [loading, setLoading] = useState(true);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
-  const [viewingDoc, setViewingDoc] = useState(null); // <-- Состояние для открытого документа
-  const [isViewerLoading, setIsViewerLoading] = useState(false); // <-- Состояние загрузки контента
+  const [viewingDoc, setViewingDoc] = useState(null);
+  const [scope, setScope] = useState('all'); // 'all' or 'my'
 
-  const load = useCallback(async (p = 1) => {
+  const load = useCallback(async (p = 1, currentScope) => {
     setLoading(true);
     try {
-      const { data } = await documentsApi.list({ page: p, limit: PAGE_SIZE });
+      const params = { page: p, limit: PAGE_SIZE };
+      if (currentScope === 'my') {
+        params.scope = 'my';
+      }
+      const { data } = await documentsApi.list(params);
       setDocs(data.items ?? []);
       setTotal(data.total);
       setPage(p);
-    } finally {
+    } catch (err) {
+      if (err.response?.status === 401) {
+        // If token expired while on 'my' tab, switch to 'all'
+        setScope('all');
+      }
+    }
+    finally {
       setLoading(false);
     }
   }, []);
 
-  useEffect(() => { load() }, [load]);
+  useEffect(() => {
+    load(1, scope);
+  }, [load, scope]);
 
   const handleDelete = async (e, id) => {
-    e.stopPropagation(); // <-- Предотвращаем открытие модалки при удалении
+    e.stopPropagation();
     if (!confirm(t('documents.delete') + '?')) return;
     await documentsApi.delete(id);
-    load(page);
+    load(page, scope);
   };
 
   const handleViewDoc = async (id) => {
-    setIsViewerLoading(true);
-    setViewingDoc({ id }); // Показываем скелет, пока грузится
+    setViewingDoc({ id }); // Show skeleton while loading
     try {
       const { data } = await documentsApi.get(id);
       setViewingDoc(data);
     } catch (error) {
       console.error("Failed to fetch document content", error);
       setViewingDoc(null);
-    } finally {
-      setIsViewerLoading(false);
     }
   };
 
-  const handleUploaded = () => load(1);
+  const handleUploaded = () => {
+    // After upload, switch to 'my' tab to see the new document
+    if (scope === 'my') {
+      load(1, 'my');
+    } else {
+      setScope('my');
+    }
+  };
+
   const totalPages = Math.ceil(total / PAGE_SIZE);
+
+  const renderDocItem = (doc) => {
+    const statusInfo = STATUS_STYLES[doc.status] || { label: doc.status, class: 'badge' };
+    return (
+      <div
+        key={doc.id}
+        onClick={() => handleViewDoc(doc.id)}
+        className="card-hover p-4 flex items-center gap-4 animate-fade-in cursor-pointer"
+      >
+        <div className="text-2xl shrink-0">{TYPE_ICON[doc.file_type] || '📄'}</div>
+        <div className="flex-1 min-w-0">
+          <p className="font-medium text-sm text-slate-800 truncate">{doc.filename}</p>
+          <p className="text-xs text-slate-400 mt-0.5">
+            {t('documents.uploadedAt')}: {new Date(doc.uploaded_at).toLocaleDateString('ru-RU')}
+          </p>
+        </div>
+        <span className={`${statusInfo.class} shrink-0`}>{statusInfo.label}</span>
+        {user && (user.role !== 'user' || user.id === doc.uploaded_by) && (
+          <button
+            onClick={(e) => handleDelete(e, doc.id)}
+            className="shrink-0 w-7 h-7 flex items-center justify-center rounded-lg text-slate-300 hover:text-red-500 hover:bg-red-50 transition-colors text-sm"
+            title={t('documents.delete')}
+          >
+            ✕
+          </button>
+        )}
+      </div>
+    );
+  };
 
   return (
     <>
@@ -70,7 +116,7 @@ export default function DocumentsPage() {
         <div>
           <h1 className="font-serif text-2xl font-bold text-primary-800">{t('documents.title')}</h1>
           <p className="text-sm text-slate-400 mt-1">
-            Архивные документы, на основе которых отвечает ИИ-ассистент
+            Загружайте документы, и система автоматически создаст карточки репрессированных.
           </p>
         </div>
         {user && (
@@ -80,61 +126,42 @@ export default function DocumentsPage() {
           </div>
         )}
         <div>
-          <p className="field-label mb-3">Загруженные документы</p>
+          {/* Tabs */}
+          <div className="flex border-b border-slate-200 mb-4">
+            <button
+              onClick={() => setScope('all')}
+              className={`px-4 py-2 text-sm font-medium ${scope === 'all' ? 'border-b-2 border-primary-500 text-primary-600' : 'text-slate-500 hover:text-slate-700'}`}
+            >
+              Все документы
+            </button>
+            {user && (
+              <button
+                onClick={() => setScope('my')}
+                className={`px-4 py-2 text-sm font-medium ${scope === 'my' ? 'border-b-2 border-primary-500 text-primary-600' : 'text-slate-500 hover:text-slate-700'}`}
+              >
+                Мои документы
+              </button>
+            )}
+          </div>
+
           <div className="space-y-2">
             {loading ? (
-              <div className="space-y-2">
-                {[...Array(3)].map((_, i) => (
-                  <div key={i} className="card p-4 animate-pulse flex gap-3">
-                    <div className="w-8 h-8 skeleton rounded" />
-                    <div className="flex-1 space-y-2">
-                      <div className="h-3.5 skeleton w-1/2 rounded" />
-                      <div className="h-3 skeleton w-1/3 rounded" />
-                    </div>
-                  </div>
-                ))}
-              </div>
+              [...Array(3)].map((_, i) => <div key={i} className="card p-4 h-16 skeleton" />)
             ) : docs.length === 0 ? (
               <div className="card p-14 text-center">
                 <p className="text-3xl mb-3 opacity-40">🗂</p>
                 <p className="font-serif text-slate-500">{t('documents.empty')}</p>
-                <p className="text-xs text-slate-400 mt-1">Загрузите первый документ выше</p>
+                {scope === 'all' && <p className="text-xs text-slate-400 mt-1">Загрузите первый документ</p>}
               </div>
             ) : (
-              docs.map(doc => (
-                <div
-                  key={doc.id}
-                  onClick={() => handleViewDoc(doc.id)}
-                  className="card-hover p-4 flex items-center gap-4 animate-fade-in cursor-pointer"
-                >
-                  <div className="text-2xl shrink-0">{TYPE_ICON[doc.file_type] || '📄'}</div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-sm text-slate-800 truncate">{doc.filename}</p>
-                    <p className="text-xs text-slate-400 mt-0.5">
-                      {t('documents.uploadedAt')}: {new Date(doc.uploaded_at).toLocaleDateString('ru-RU')}
-                    </p>
-                  </div>
-                  <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${TYPE_COLOR[doc.file_type] || 'bg-slate-100 text-slate-500'}`}>
-                    {doc.file_type}
-                  </span>
-                  {user?.role !== 'user' && (
-                    <button
-                      onClick={(e) => handleDelete(e, doc.id)}
-                      className="shrink-0 w-7 h-7 flex items-center justify-center rounded-lg text-slate-300 hover:text-red-500 hover:bg-red-50 transition-colors text-sm"
-                      title={t('documents.delete')}
-                    >
-                      ✕
-                    </button>
-                  )}
-                </div>
-              ))
+              docs.map(renderDocItem)
             )}
           </div>
           {totalPages > 1 && (
             <Pagination
               currentPage={page}
               totalPages={totalPages}
-              onPageChange={load}
+              onPageChange={(p) => load(p, scope)}
             />
           )}
         </div>

@@ -6,14 +6,12 @@ import { personsApi } from '../api';
 import PersonCard from '../components/PersonCard';
 import SearchBar from '../components/SearchBar';
 import MapVisualization from '../components/MapVisualization';
-import { useAuth } from '../hooks/useAuth';
 import Pagination from '../components/Pagination';
 
 const PAGE_SIZE = 10;
 
 export default function HomePage() {
   const { t } = useTranslation();
-  const { user } = useAuth();
   const [persons, setPersons] = useState([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
@@ -45,30 +43,23 @@ export default function HomePage() {
       <div className="relative rounded-2xl overflow-hidden bg-primary-800 px-8 py-10 shadow-card-lg">
         <div className="absolute inset-0 bg-gradient-to-br from-primary-900/80 via-primary-800 to-primary-700/90 pointer-events-none" />
         <div className="absolute right-0 top-0 w-1/3 h-full bg-gradient-to-l from-white/5 to-transparent pointer-events-none" />
-        <div className="relative flex items-end justify-between gap-6">
-          <div>
-            <div className="flex items-center gap-2 mb-3">
-              <div className="w-6 h-px bg-primary-300/60" />
-              <span className="text-primary-200 text-[10px] font-semibold tracking-[0.25em] uppercase">1918–1953</span>
-              <div className="w-6 h-px bg-primary-300/60" />
-            </div>
-            <h1 className="font-serif text-4xl font-bold text-white leading-tight mb-2">
-              {t('app.title')}
-            </h1>
-            <p className="text-slate-300 text-sm max-w-lg leading-relaxed">
-              {t('app.description')}
-            </p>
-            {total > 0 && (
-              <div className="mt-4 flex items-center gap-1.5 text-sm">
-                <span className="text-primary-300 font-semibold font-serif text-lg">{total.toLocaleString()}</span>
-                <span className="text-slate-400">{t('common.records')}</span>
-              </div>
-            )}
+        <div className="relative">
+          <div className="flex items-center gap-2 mb-3">
+            <div className="w-6 h-px bg-primary-300/60" />
+            <span className="text-primary-200 text-[10px] font-semibold tracking-[0.25em] uppercase">1918–1953</span>
+            <div className="w-6 h-px bg-primary-300/60" />
           </div>
-          {user && (
-            <Link to="/persons/new" className="shrink-0 btn-primary shadow-lg">
-              + {t('person.add')}
-            </Link>
+          <h1 className="font-serif text-4xl font-bold text-white leading-tight mb-2">
+            {t('app.title')}
+          </h1>
+          <p className="text-slate-300 text-sm max-w-lg leading-relaxed">
+            {t('app.description')}
+          </p>
+          {total > 0 && (
+            <div className="mt-4 flex items-center gap-1.5 text-sm">
+              <span className="text-primary-300 font-semibold font-serif text-lg">{total.toLocaleString()}</span>
+              <span className="text-slate-400">{t('common.records')}</span>
+            </div>
           )}
         </div>
       </div>
