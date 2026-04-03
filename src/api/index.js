@@ -29,13 +29,20 @@ export const authApi = {
 };
 
 export const personsApi = {
-  // list теперь принимает params (page, limit, q, region, status и т.д.)
   list: (params) => api.get('/api/persons', { params }),
   get: (id) => api.get(`/api/persons/${id}`),
   create: (data) => api.post('/api/persons', data),
   update: (id, data) => api.put(`/api/persons/${id}`, data),
   delete: (id) => api.delete(`/api/persons/${id}`),
   setStatus: (id, status) => api.patch(`/api/persons/${id}/status`, { status }),
+  // --- НОВЫЙ МЕТОД ---
+  extractFromDocument: (file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return api.post('/api/persons/extract', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+  }
 };
 
 export const documentsApi = {
@@ -58,4 +65,7 @@ export const chatApi = {
   getSessionMessages: (id) => api.get(`/api/chat/sessions/${id}`),
 };
 
+
+
 export default api;
+
