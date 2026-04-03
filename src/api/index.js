@@ -49,6 +49,7 @@ export const personsApi = {
 
 export const factsApi = {
   get: (params) => api.get('/facts', { params }),
+  generate: () => api.post('/facts/generate'),
 };
 
 export const documentsApi = {

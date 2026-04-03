@@ -10,11 +10,6 @@ import FactsTab from '../components/FactsTab'
 
 const PAGE_SIZE = 10
 
-const TABS = [
-  { id: 'people', label: '👤 Люди' },
-  { id: 'facts',  label: '📖 История' },
-]
-
 export default function HomePage() {
   const { t } = useTranslation()
   const [tab, setTab] = useState('people')
@@ -27,22 +22,41 @@ export default function HomePage() {
   const load = useCallback(async (searchParams, p = 1) => {
     setLoading(true)
     try {
-      const clean = Object.fromEntries(Object.entries(searchParams).filter(([, v]) => v !== '' && v != null))
+      const clean = Object.fromEntries(
+        Object.entries(searchParams).filter(([, v]) => v !== '' && v != null)
+      )
       const { data } = await personsApi.list({ ...clean, page: p, limit: PAGE_SIZE })
       setPersons(data.items)
       setTotal(data.total)
       setPage(p)
-    } catch {
-      // ignore
-    } finally {
-      setLoading(false)
-    }
+    } catch { /* ignore */ }
+    finally { setLoading(false) }
   }, [])
 
   useEffect(() => { load({}, 1) }, [load])
 
   const handleSearch = (p) => { setParams(p); load(p, 1) }
   const totalPages = Math.ceil(total / PAGE_SIZE)
+
+  const sidebar = (
+    <div className="space-y-4">
+      <MapVisualization />
+      <div className="card p-5 space-y-3">
+        <div className="flex items-center gap-2">
+          <div className="w-4 h-px bg-primary-300/50" />
+          <p className="font-serif font-semibold text-slate-800 text-sm">О проекте</p>
+        </div>
+        <p className="text-xs text-slate-500 leading-relaxed">
+          «Архивдин Үнү» — цифровой мемориал жертв политических репрессий 1918–1953 гг.
+          на территории современного Кыргызстана.
+        </p>
+        <div className="divider-navy" />
+        <Link to="/chat" className="btn-primary w-full justify-center !text-xs">
+          Спросить ИИ-архивариуса
+        </Link>
+      </div>
+    </div>
+  )
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-7">
@@ -69,106 +83,67 @@ export default function HomePage() {
 
       {/* Tabs */}
       <div className="flex gap-1 bg-slate-100 rounded-xl p-1 w-fit">
-        {TABS.map(t => (
+        {[{ id: 'people', label: '👤 Люди' }, { id: 'facts', label: '📖 История' }].map(tb => (
           <button
-            key={t.id}
-            onClick={() => setTab(t.id)}
+            key={tb.id}
+            onClick={() => setTab(tb.id)}
             className={`px-5 py-2 rounded-lg text-sm font-medium transition-all ${
-              tab === t.id
-                ? 'bg-white text-slate-800 shadow-sm'
-                : 'text-slate-500 hover:text-slate-700'
+              tab === tb.id ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-700'
             }`}
           >
-            {t.label}
+            {tb.label}
           </button>
         ))}
       </div>
 
-      {tab === 'people' && (
-        <>
+      {/* Content — both tabs rendered, hidden via CSS to avoid remount/reload */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* People tab */}
+        <div className={`lg:col-span-2 space-y-3 ${tab === 'people' ? '' : 'hidden'}`}>
           <SearchBar onSearch={handleSearch} />
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Left: person list */}
-            <div className="lg:col-span-2 space-y-3">
-              {!loading && persons.length > 0 && (
-                <p className="text-xs text-slate-400 px-1">
-                  {t('common.total')}: <strong className="text-slate-600">{total}</strong> {t('common.records')}
-                </p>
-              )}
-              {loading ? (
-                <div className="space-y-3">
-                  {[...Array(5)].map((_, i) => (
-                    <div key={i} className="card p-5">
-                      <div className="flex gap-4">
-                        <div className="w-0.5 h-12 skeleton" />
-                        <div className="flex-1 space-y-2">
-                          <div className="h-4 skeleton w-2/3 rounded" />
-                          <div className="h-3 skeleton w-1/3 rounded" />
-                        </div>
-                      </div>
+          {!loading && persons.length > 0 && (
+            <p className="text-xs text-slate-400 px-1">
+              {t('common.total')}: <strong className="text-slate-600">{total}</strong> {t('common.records')}
+            </p>
+          )}
+          {loading ? (
+            <div className="space-y-3">
+              {[...Array(5)].map((_, i) => (
+                <div key={i} className="card p-5">
+                  <div className="flex gap-4">
+                    <div className="w-0.5 h-12 skeleton" />
+                    <div className="flex-1 space-y-2">
+                      <div className="h-4 skeleton w-2/3 rounded" />
+                      <div className="h-3 skeleton w-1/3 rounded" />
                     </div>
-                  ))}
+                  </div>
                 </div>
-              ) : persons.length === 0 ? (
-                <div className="card p-14 text-center">
-                  <p className="text-4xl mb-3 opacity-40">🕊</p>
-                  <p className="font-serif text-slate-500">{t('person.notFound')}</p>
-                  <p className="text-xs text-slate-400 mt-1">Попробуйте изменить параметры поиска</p>
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  {persons.map(p => <PersonCard key={p.id} person={p} />)}
-                </div>
-              )}
-              {totalPages > 1 && (
-                <Pagination currentPage={page} totalPages={totalPages} onPageChange={(p) => load(params, p)} />
-              )}
+              ))}
             </div>
-
-            {/* Right sidebar */}
-            <div className="space-y-4">
-              <MapVisualization />
-              <div className="card p-5 space-y-3">
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-px bg-primary-300/50" />
-                  <p className="font-serif font-semibold text-slate-800 text-sm">О проекте</p>
-                </div>
-                <p className="text-xs text-slate-500 leading-relaxed">
-                  «Архивдин Үнү» — цифровой мемориал жертв политических репрессий 1918–1953 гг. на территории современного Кыргызстана.
-                </p>
-                <div className="divider-navy" />
-                <Link to="/chat" className="btn-primary w-full justify-center !text-xs">
-                  Спросить ИИ-архивариуса
-                </Link>
-              </div>
+          ) : persons.length === 0 ? (
+            <div className="card p-14 text-center">
+              <p className="text-4xl mb-3 opacity-40">🕊</p>
+              <p className="font-serif text-slate-500">{t('person.notFound')}</p>
+              <p className="text-xs text-slate-400 mt-1">Попробуйте изменить параметры поиска</p>
             </div>
-          </div>
-        </>
-      )}
-
-      {tab === 'facts' && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2">
-            <FactsTab />
-          </div>
-          <div className="space-y-4">
-            <MapVisualization />
-            <div className="card p-5 space-y-3">
-              <div className="flex items-center gap-2">
-                <div className="w-4 h-px bg-primary-300/50" />
-                <p className="font-serif font-semibold text-slate-800 text-sm">О проекте</p>
-              </div>
-              <p className="text-xs text-slate-500 leading-relaxed">
-                «Архивдин Үнү» — цифровой мемориал жертв политических репрессий 1918–1953 гг. на территории современного Кыргызстана.
-              </p>
-              <div className="divider-navy" />
-              <Link to="/chat" className="btn-primary w-full justify-center !text-xs">
-                Спросить ИИ-архивариуса
-              </Link>
+          ) : (
+            <div className="space-y-2">
+              {persons.map(p => <PersonCard key={p.id} person={p} />)}
             </div>
-          </div>
+          )}
+          {totalPages > 1 && (
+            <Pagination currentPage={page} totalPages={totalPages} onPageChange={(p) => load(params, p)} />
+          )}
         </div>
-      )}
+
+        {/* Facts tab */}
+        <div className={`lg:col-span-2 ${tab === 'facts' ? '' : 'hidden'}`}>
+          <FactsTab />
+        </div>
+
+        {/* Sidebar — always visible */}
+        <div className="space-y-4">{sidebar}</div>
+      </div>
     </div>
   )
 }

@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
-import { documentsApi } from '../api';
+import { documentsApi, factsApi } from '../api';
 import FileUploader from '../components/FileUploader';
 import { useAuth } from '../hooks/useAuth';
 import Pagination from '../components/Pagination';
@@ -26,6 +26,8 @@ export default function DocumentsPage() {
   const [page, setPage] = useState(1);
   const [viewingDoc, setViewingDoc] = useState(null);
   const [scope, setScope] = useState('all');
+  const [generating, setGenerating] = useState(false);
+  const [genMsg, setGenMsg] = useState('');
 
   const load = useCallback(async (p = 1, currentScope) => {
     setLoading(true);
@@ -92,6 +94,19 @@ export default function DocumentsPage() {
 
   const totalPages = Math.ceil(total / PAGE_SIZE);
 
+  const handleGenerateFacts = async () => {
+    setGenerating(true);
+    setGenMsg('');
+    try {
+      await factsApi.generate();
+      setGenMsg('✓ Генерация запущена — факты появятся через несколько минут');
+    } catch {
+      setGenMsg('Ошибка — нет прав или сервер недоступен');
+    } finally {
+      setGenerating(false);
+    }
+  };
+
   const renderDocItem = (doc) => {
     const statusInfo = STATUS_STYLES[doc.status] || { label: doc.status, class: 'badge' };
     return (
@@ -125,11 +140,28 @@ export default function DocumentsPage() {
     <>
       {viewingDoc && <DocumentViewerModal doc={viewingDoc} onClose={() => setViewingDoc(null)} />}
       <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 space-y-7">
-        <div>
-          <h1 className="font-serif text-2xl font-bold text-primary-800">{t('documents.title')}</h1>
-          <p className="text-sm text-slate-400 mt-1">
-            Загружайте документы, и система автоматически создаст карточки репрессированных.
-          </p>
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h1 className="font-serif text-2xl font-bold text-primary-800">{t('documents.title')}</h1>
+            <p className="text-sm text-slate-400 mt-1">
+              Загружайте документы, и система автоматически создаст карточки репрессированных.
+            </p>
+          </div>
+          {user && ['moderator', 'super_admin'].includes(user.role) && (
+            <div className="shrink-0 text-right">
+              <button
+                onClick={handleGenerateFacts}
+                disabled={generating}
+                className="btn-outline !text-xs !py-2 !px-3 flex items-center gap-1.5"
+              >
+                {generating
+                  ? <span className="w-3 h-3 border border-slate-400 border-t-transparent rounded-full animate-spin" />
+                  : '✨'}
+                Сгенерировать факты
+              </button>
+              {genMsg && <p className="text-[11px] mt-1 text-slate-500">{genMsg}</p>}
+            </div>
+          )}
         </div>
         {user && (
           <div className="card p-5">
