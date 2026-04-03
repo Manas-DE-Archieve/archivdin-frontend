@@ -15,7 +15,7 @@ function ProtectedRoute({ children, roles, onOpenLogin }) {
   const { user, loading } = useAuth()
   if (loading) return <div className="text-center py-20 text-slate-400">Загрузка...</div>
   if (!user) {
-    if (onOpenLogin) { onOpenLogin(); return null }
+    if (onOpenLogin) { onOpenLogin(); return <Navigate to="/" replace /> }
     return <Navigate to="/login" replace />
   }
   if (roles && !roles.includes(user.role)) return <Navigate to="/" replace />
