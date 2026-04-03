@@ -46,7 +46,7 @@ function AppRoutes() {
           <Route path="/chat" element={<ChatPage />} />
           <Route path="/documents" element={<DocumentsPage />} />
           <Route path="/admin" element={
-            <ProtectedRoute roles={['moderator', 'admin']} onOpenLogin={() => setLoginOpen(true)}>
+            <ProtectedRoute roles={['moderator', 'super_admin']} onOpenLogin={() => setLoginOpen(true)}>
               <AdminPage />
             </ProtectedRoute>
           } />
