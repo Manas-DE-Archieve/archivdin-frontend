@@ -1,0 +1,22 @@
+# ─────────────────────────────────────────────────────
+#  Только frontend — для разработки UI отдельно
+#  Положить в: archivdin-frontend/docker-compose.yml
+#  Требует: backend запущен на localhost:8000
+#  Запуск: docker compose up (из папки frontend)
+# ─────────────────────────────────────────────────────
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+      - node_modules:/app/node_modules
+    environment:
+      # Если backend на другом хосте — поменяй здесь
+      VITE_API_URL: http://localhost:8000
+
+volumes:
+  node_modules:
