@@ -5,23 +5,17 @@ import Navbar from './components/Navbar'
 import LoginModal from './components/LoginModal'
 import HomePage from './pages/HomePage'
 import PersonPage from './pages/PersonPage'
+import PersonFormPage from './pages/PersonFormPage'
 import ChatPage from './pages/ChatPage'
 import DocumentsPage from './pages/DocumentsPage'
 import AdminPage from './pages/AdminPage'
 import LoginPage from './pages/LoginPage'
 import SetupPage from './pages/SetupPage'
+import 'leaflet/dist/leaflet.css';
 
 function ProtectedRoute({ children, roles, onOpenLogin }) {
   const { user, loading } = useAuth()
-  if (loading) return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
-      <div style={{ textAlign: 'center' }}>
-        <div style={{ width: 36, height: 36, border: '3px solid #e8eef5', borderTopColor: '#2980b9', borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto 12px' }} />
-        <p style={{ color: '#94a3b8', fontSize: 13 }}>Загрузка...</p>
-      </div>
-      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-    </div>
-  )
+  if (loading) return <div className="text-center py-20 text-slate-400">Загрузка...</div>
   if (!user) {
     if (onOpenLogin) { onOpenLogin(); return <Navigate to="/" replace /> }
     return <Navigate to="/login" replace />
@@ -30,17 +24,28 @@ function ProtectedRoute({ children, roles, onOpenLogin }) {
   return children
 }
 
-function AppRoutes() {
+
+function AppContent() {
   const [loginOpen, setLoginOpen] = useState(false)
 
   return (
-    <div style={{ minHeight: '100vh', background: '#f5f7fa' }}>
+    <div className="min-h-screen bg-slate-50">
       <Navbar onOpenLogin={() => setLoginOpen(true)} />
       {loginOpen && <LoginModal onClose={() => setLoginOpen(false)} />}
       <main>
         <Routes>
           <Route path="/" element={<HomePage />} />
+          <Route path="/persons/new" element={
+            <ProtectedRoute onOpenLogin={() => setLoginOpen(true)}>
+              <PersonFormPage />
+            </ProtectedRoute>
+          } />
           <Route path="/persons/:id" element={<PersonPage />} />
+          <Route path="/persons/:id/edit" element={
+            <ProtectedRoute onOpenLogin={() => setLoginOpen(true)}>
+              <PersonFormPage />
+            </ProtectedRoute>
+          } />
           <Route path="/chat" element={<ChatPage />} />
           <Route path="/documents" element={<DocumentsPage />} />
           <Route path="/admin" element={
@@ -61,7 +66,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <AppRoutes />
+        <AppContent />
       </AuthProvider>
     </BrowserRouter>
   )

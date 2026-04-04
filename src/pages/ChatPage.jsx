@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { useTranslation } from '../../node_modules/react-i18next'
+import { useTranslation } from 'react-i18next'
 import { chatApi } from '../api'
 import SourceCard from '../components/SourceCard'
 import { useAuth } from '../hooks/useAuth'
