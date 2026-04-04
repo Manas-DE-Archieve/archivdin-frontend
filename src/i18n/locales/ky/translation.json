@@ -1,6 +1,6 @@
 {
   "app.title": "Архивдин Үнү",
-  "app.subtitle": "Архивдин Үнү",
+  "app.subtitle": "Архивден чыккан үн",
   "app.description": "1918–1953-жж. репрессияланган адамдардын санариптик архиви",
   "nav.home": "Архив",
   "nav.chat": "ЖИ-жардамчы",
@@ -81,5 +81,16 @@
   "common.total": "Бардыгы",
   "common.records": "жазуу",
   "map.title": "Репрессиянын географиясы",
-  "map.persons": "адам"
+  "map.persons": "адам",
+  "person.notFoundSubtext": "Издөө параметрлерин өзгөртүп көрүңүз",
+  "common.back": "Артка",
+  "common.next": "Кийинки",
+  "about.title": "Долбоор жөнүндө",
+  "about.description": "«Архивдин Үнү» — азыркы Кыргызстандын аймагындагы саясий репрессиялардын курмандыктарына (1918–1953) арналган санариптик мемориал.",
+  "chat.askButton": "AI Архивчи",
+  "nav.history": "Тарых",
+  "stats.total": "Архивдеги адамдар",
+  "stats.executed": "Атылган",
+  "stats.rehabilitated": "Реабилитацияланган",
+  "stats.regions": "Аймак"
 }

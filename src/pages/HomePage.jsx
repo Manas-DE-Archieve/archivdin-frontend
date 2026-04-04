@@ -7,6 +7,7 @@ import SearchBar from '../components/SearchBar'
 import MapVisualization from '../components/MapVisualization'
 import Pagination from '../components/Pagination'
 import FactsTab from '../components/FactsTab'
+import StatsBar from '../components/StatsBar'
 
 const PAGE_SIZE = 10
 
@@ -155,7 +156,7 @@ export default function HomePage() {
       }}>
         {[
           { id: 'people', Icon: PeopleIcon, label: t('nav.home') },
-          { id: 'facts',  Icon: BookIcon,   label: 'История' },
+          { id: 'facts',  Icon: BookIcon,   label: t('nav.history') },
         ].map(tb => (
           <button
             key={tb.id}
@@ -181,7 +182,8 @@ export default function HomePage() {
         {/* People tab */}
         <div style={{ display: tab === 'people' ? 'block' : 'none' }}>
           <SearchBar onSearch={handleSearch} />
-          
+          <StatsBar />
+
           {!loading && persons.length > 0 && (
             <p style={{ color: '#94a3b8', fontSize: 12, margin: '12px 0 8px 4px' }}>
               {t('common.total')}: <strong style={{ color: '#5a7590' }}>{total}</strong> {t('common.records')}
@@ -228,11 +230,10 @@ export default function HomePage() {
               margin: '0 0 10px', display: 'flex', alignItems: 'center', gap: 8,
             }}>
               <span style={{ fontSize: 16 }}>📖</span>
-              О проекте
+              {t('about.title')}
             </p>
             <p style={{ color: '#7d95ab', fontSize: 13, lineHeight: 1.7, margin: '0 0 16px' }}>
-              «Архивдин Үнү» — цифровой мемориал жертв политических репрессий 1918–1953 гг.
-              на территории современного Кыргызстана.
+              {t('about.description')}
             </p>
             <div style={{ borderTop: '1px solid #eef2f7', paddingTop: 14 }}>
               <Link
@@ -241,7 +242,7 @@ export default function HomePage() {
                 style={{ width: '100%', justifyContent: 'center', textDecoration: 'none', fontSize: 13, display: 'flex' }}
               >
                 <ChatIcon />
-                Спросить ИИ-архивариуса
+                {t('chat.askButton')}
               </Link>
             </div>
           </div>

@@ -11,7 +11,6 @@
   "search.placeholder": "Search by name...",
   "search.search": "Search",
   "search.filters": "Filters",
-  "search.search": "Seach",
   "search.region": "Region",
   "search.charge": "Charge",
   "search.yearFrom": "Year (from)",
@@ -88,5 +87,10 @@
   "common.next": "Next",
   "about.title": "About",
   "about.description": "«Voice of the Archive» — a digital memorial for victims of political repression (1918–1953) in modern Kyrgyzstan.",
-  "chat.askButton": "Ask AI Archivist"
+  "chat.askButton": "Ask AI Archivist",
+  "nav.history": "History",
+  "stats.total": "People in the archive",
+  "stats.executed": "Executed",
+  "stats.rehabilitated": "Rehabilitated",
+  "stats.regions": "Regions"
 }

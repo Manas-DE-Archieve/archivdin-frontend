@@ -81,5 +81,16 @@
   "common.total": "Всего",
   "common.records": "записей",
   "map.title": "География репрессий",
-  "map.persons": "чел."
+  "map.persons": "чел.",
+  "person.notFoundSubtext": "Попробуйте изменить параметры поиска",
+  "common.back": "Назад",
+  "common.next": "Далее",
+  "about.title": "О проекте",
+  "about.description": "«Голос архива» — цифровой мемориал жертв политических репрессий (1918–1953) на территории современного Кыргызстана.",
+  "chat.askButton": "Спросить архивиста",
+  "nav.history": "История",
+  "stats.total": "Человек в архиве",
+  "stats.executed": "Расстреляно",
+  "stats.rehabilitated": "Реабилитировано",
+  "stats.regions": "Регионов"
 }
