@@ -1,23 +1,7 @@
-# frontend/Dockerfile.dev
-
-# Использовать базовый образ Node.js
 FROM node:20-alpine
-
-# Установить рабочую директорию
 WORKDIR /app
-
-# Копировать package.json и package-lock.json для кэширования установки зависимостей
 COPY package*.json ./
-
-# Установить зависимости
 RUN npm install
-
-# Копировать остальной код приложения
 COPY . .
-
-# Открыть порт 3000 для доступа извне
 EXPOSE 3000
-
-# Команда для запуска dev-сервера Vite.
-# Vite сам подхватит настройки хоста и порта из vite.config.js
-CMD ["npm", "run", "dev"]
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0", "--port", "3000"]

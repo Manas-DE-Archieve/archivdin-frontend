@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useTranslation } from '../../node_modules/react-i18next';
+import { useTranslation } from 'react-i18next'
 import { MapContainer, TileLayer, CircleMarker, Tooltip, GeoJSON } from 'react-leaflet';
 import { personsApi } from '../api';
 
