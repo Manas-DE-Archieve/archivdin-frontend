@@ -3,62 +3,49 @@
 @tailwind utilities;
 
 @layer base {
+  html {
+    scroll-behavior: smooth;
+  }
   body {
     background-color: #f7fafc;
     @apply text-slate-800 font-sans antialiased;
   }
-
-  h1, h2, h3 {
-    @apply font-serif;
-  }
-
-  ::selection {
-    background-color: rgba(0, 67, 112, 0.15);
-    color: #004370;
-  }
+  h1, h2, h3 { @apply font-serif; }
+  ::selection { background-color: rgba(0,67,112,0.15); color:#004370; }
 }
 
 @layer components {
-  /* ── Buttons ─────────────────────────────────────────── */
+  /* ── Buttons ── */
   .btn-primary {
     @apply inline-flex items-center gap-2 px-5 py-2.5 rounded-lg
-           bg-primary-500 text-white font-medium text-sm tracking-wide
-           shadow-sm
+           bg-primary-500 text-white font-medium text-sm tracking-wide shadow-sm
            hover:bg-primary-600 hover:-translate-y-px hover:shadow-md
            active:translate-y-0 active:bg-primary-700
            transition-all duration-150
            disabled:opacity-50 disabled:cursor-not-allowed
            disabled:hover:translate-y-0 disabled:hover:shadow-sm;
   }
-
   .btn-outline {
     @apply inline-flex items-center gap-2 px-5 py-2.5 rounded-lg
-           border border-slate-300 text-slate-700 font-medium text-sm
-           bg-white
+           border border-slate-300 text-slate-700 font-medium text-sm bg-white
            hover:border-primary-500 hover:text-primary-600 hover:-translate-y-px
-           active:translate-y-0
-           transition-all duration-150;
+           active:translate-y-0 transition-all duration-150;
   }
-
   .btn-ghost {
     @apply inline-flex items-center gap-2 px-3 py-2 rounded-lg
            text-slate-500 font-medium text-sm
-           hover:bg-slate-100 hover:text-slate-700
-           transition-all duration-150;
+           hover:bg-slate-100 hover:text-slate-700 transition-all duration-150;
   }
 
-  /* ── Cards ───────────────────────────────────────────── */
-  .card {
-    @apply bg-white rounded-xl border border-slate-200 shadow-sm;
-  }
-
-  .card-hover {
+  /* ── Cards ── */
+  .card        { @apply bg-white rounded-xl border border-slate-200 shadow-sm; }
+  .card-hover  {
     @apply bg-white rounded-xl border border-slate-200 shadow-sm
            transition-all duration-200
            hover:shadow-md hover:-translate-y-0.5 hover:border-slate-300;
   }
 
-  /* ── Inputs ──────────────────────────────────────────── */
+  /* ── Inputs ── */
   .input {
     @apply w-full px-3.5 py-2.5 border border-slate-300 rounded-lg text-sm
            bg-white text-slate-800 placeholder-slate-400
@@ -66,45 +53,66 @@
            transition-all duration-150;
   }
 
-  /* ── Badges ──────────────────────────────────────────── */
-  .badge {
-    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold tracking-wide;
-  }
+  /* ── Badges ── */
+  .badge          { @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold tracking-wide; }
   .badge-verified { @apply badge bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200; }
-  .badge-pending  { @apply badge bg-amber-50 text-amber-700 ring-1 ring-amber-200; }
-  .badge-rejected { @apply badge bg-red-50 text-red-700 ring-1 ring-red-200; }
+  .badge-pending  { @apply badge bg-amber-50  text-amber-700  ring-1 ring-amber-200; }
+  .badge-rejected { @apply badge bg-red-50    text-red-700    ring-1 ring-red-200; }
 
-  /* ── Typography helpers ──────────────────────────────── */
-  .field-label {
-    @apply text-xs font-semibold text-slate-400 uppercase tracking-widest;
-  }
+  /* ── Typography ── */
+  .field-label { @apply text-xs font-semibold text-slate-400 uppercase tracking-widest; }
+  .field-value { @apply mt-1 text-sm text-slate-800 leading-relaxed; }
+  .divider-navy { border-top: 1px solid rgba(0,67,112,0.12); }
 
-  .field-value {
-    @apply mt-1 text-sm text-slate-800 leading-relaxed;
-  }
-
-  .divider-navy {
-    border-top: 1px solid rgba(0, 67, 112, 0.12);
-  }
-
-  /* ── Skeleton loader ─────────────────────────────────── */
-  .skeleton {
-    @apply animate-pulse bg-slate-200 rounded;
-  }
+  /* ── Skeleton ── */
+  .skeleton { @apply animate-pulse bg-slate-200 rounded; }
 }
 
-/* SSE typing cursor */
+/* ── SSE cursor ── */
 .typing-cursor::after {
   content: '▋';
   animation: blink 1s step-start infinite;
   color: #004370;
 }
-@keyframes blink {
-  50% { opacity: 0; }
-}
+@keyframes blink { 50% { opacity: 0; } }
 
-/* Thin scrollbar */
-::-webkit-scrollbar       { width: 5px; height: 5px; }
+/* ── Scrollbar ── */
+::-webkit-scrollbar       { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: #cbd5e0; border-radius: 9999px; }
-::-webkit-scrollbar-thumb:hover { background: #a0aec0; }
+::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+/* ── Mobile drawer backdrop ── */
+.drawer-backdrop {
+  @apply fixed inset-0 bg-black/40 z-30 backdrop-blur-sm;
+  animation: fadeIn 0.2s ease;
+}
+.drawer-panel {
+  animation: slideInLeft 0.25s cubic-bezier(0.4,0,0.2,1);
+}
+@keyframes slideInLeft {
+  from { transform: translateX(-100%); opacity: 0.5; }
+  to   { transform: translateX(0);     opacity: 1; }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ── Smooth page transitions ── */
+.page-fade-in {
+  animation: pageFade 0.2s ease;
+}
+@keyframes pageFade {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Pagination smooth list transition ── */
+.list-transition {
+  transition: opacity 0.15s ease;
+}
+.list-transition.loading {
+  opacity: 0.5;
+  pointer-events: none;
+}

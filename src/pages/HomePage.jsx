@@ -1,6 +1,6 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { Link } from 'react-router-dom'
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from '../../node_modules/react-i18next'
 import { personsApi } from '../api'
 import PersonCard from '../components/PersonCard'
 import SearchBar from '../components/SearchBar'
@@ -18,6 +18,7 @@ export default function HomePage() {
   const [page, setPage] = useState(1)
   const [params, setParams] = useState({})
   const [loading, setLoading] = useState(false)
+  const listRef = useRef(null)
 
   const load = useCallback(async (searchParams, p = 1) => {
     setLoading(true)
@@ -98,7 +99,6 @@ export default function HomePage() {
 
       {/* Content — both tabs rendered, hidden via CSS to avoid remount/reload */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* People tab */}
         <div className={`lg:col-span-2 space-y-3 ${tab === 'people' ? '' : 'hidden'}`}>
           <SearchBar onSearch={handleSearch} />
           {!loading && persons.length > 0 && (
@@ -106,9 +106,9 @@ export default function HomePage() {
               {t('common.total')}: <strong className="text-slate-600">{total}</strong> {t('common.records')}
             </p>
           )}
-          {loading ? (
-            <div className="space-y-3">
-              {[...Array(5)].map((_, i) => (
+          <div ref={listRef} className={`space-y-2 transition-opacity duration-200 ${loading ? 'opacity-40 pointer-events-none' : 'opacity-100'}`}>
+            {loading && persons.length === 0 ? (
+              [...Array(5)].map((_, i) => (
                 <div key={i} className="card p-5">
                   <div className="flex gap-4">
                     <div className="w-0.5 h-12 skeleton" />
@@ -118,21 +118,24 @@ export default function HomePage() {
                     </div>
                   </div>
                 </div>
-              ))}
-            </div>
-          ) : persons.length === 0 ? (
-            <div className="card p-14 text-center">
-              <p className="text-4xl mb-3 opacity-40">🕊</p>
-              <p className="font-serif text-slate-500">{t('person.notFound')}</p>
-              <p className="text-xs text-slate-400 mt-1">Попробуйте изменить параметры поиска</p>
-            </div>
-          ) : (
-            <div className="space-y-2">
-              {persons.map(p => <PersonCard key={p.id} person={p} />)}
-            </div>
-          )}
+              ))
+            ) : persons.length === 0 ? (
+              <div className="card p-14 text-center page-fade-in">
+                <p className="text-4xl mb-3 opacity-40">🕊</p>
+                <p className="font-serif text-slate-500">{t('person.notFound')}</p>
+                <p className="text-xs text-slate-400 mt-1">Попробуйте изменить параметры поиска</p>
+              </div>
+            ) : (
+              persons.map(p => <PersonCard key={p.id} person={p} />)
+            )}
+          </div>
           {totalPages > 1 && (
-            <Pagination currentPage={page} totalPages={totalPages} onPageChange={(p) => load(params, p)} />
+            <Pagination
+              currentPage={page}
+              totalPages={totalPages}
+              onPageChange={(p) => load(params, p)}
+              scrollRef={listRef}
+            />
           )}
         </div>
 
