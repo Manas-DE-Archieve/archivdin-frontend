@@ -25,9 +25,7 @@ export default function HomePage() {
   const load = useCallback(async (searchParams, p = 1) => {
     setLoading(true)
     try {
-      const clean = Object.fromEntries(
-        Object.entries(searchParams).filter(([, v]) => v !== '' && v != null)
-      )
+      const clean = Object.fromEntries(Object.entries(searchParams).filter(([, v]) => v !== '' && v != null))
       const { data } = await personsApi.list({ ...clean, page: p, limit: PAGE_SIZE })
       setPersons(data.items)
       setTotal(data.total)
@@ -42,118 +40,114 @@ export default function HomePage() {
   const totalPages = Math.ceil(total / PAGE_SIZE)
 
   return (
-    <div style={{ maxWidth: 1200, margin: '0 auto', padding: '24px 16px' }}>
-
-      {/* Hero */}
-      <div style={{
-        borderRadius: 20, overflow: 'hidden',
-        background: 'linear-gradient(135deg, #1a3a5c 0%, #1e4d78 40%, #16639e 100%)',
-        padding: 'clamp(24px, 5vw, 48px) clamp(20px, 5vw, 48px)',
-        marginBottom: 20, position: 'relative',
-      }}>
-        <div style={{ position: 'absolute', top: 0, right: 0, width: '40%', height: '100%', background: 'radial-gradient(ellipse at right, rgba(255,255,255,0.05) 0%, transparent 70%)', pointerEvents: 'none' }} />
-        <div style={{ position: 'relative' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
-            <div style={{ height: 1, width: 28, background: 'rgba(255,255,255,0.3)' }} />
-            <span style={{ color: 'rgba(255,255,255,0.55)', fontSize: 11, fontWeight: 700, letterSpacing: 3, textTransform: 'uppercase' }}>1918 — 1953</span>
-            <div style={{ height: 1, width: 28, background: 'rgba(255,255,255,0.3)' }} />
+    // Обертка. Добавлен pt-4 (padding-top) чтобы контент дышал
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-4 pb-12">
+      
+      {/* Hero Section */}
+      <div className="relative overflow-hidden rounded-2xl sm:rounded-[2rem] bg-gradient-to-br from-[#1a3a5c] via-[#1e4d78] to-[#16639e] p-6 sm:p-12 mb-6 sm:mb-8 shadow-xl">
+        <div className="absolute top-0 right-0 w-1/2 h-full bg-[radial-gradient(ellipse_at_right,_rgba(255,255,255,0.1)_0%,_transparent_70%)] pointer-events-none" />
+        
+        <div className="relative z-10 flex flex-col items-start sm:items-start text-left">
+          <div className="flex items-center gap-3 mb-4 opacity-70">
+            <div className="h-px w-6 sm:w-8 bg-white" />
+            <span className="text-[10px] sm:text-xs font-bold tracking-[0.2em] text-white uppercase">1918 — 1953</span>
+            <div className="h-px w-6 sm:w-8 bg-white" />
           </div>
-          <h1 style={{ fontFamily: '"Playfair Display", serif', fontSize: 'clamp(24px, 5vw, 42px)', fontWeight: 700, color: '#fff', margin: '0 0 10px', lineHeight: 1.2 }}>
+          
+          <h1 className="font-serif text-3xl sm:text-5xl font-bold text-white mb-3 leading-tight">
             Архивдин Үнү
           </h1>
-          <p style={{ color: 'rgba(255,255,255,0.65)', fontSize: 'clamp(13px, 2vw, 15px)', maxWidth: 500, margin: '0 0 22px', lineHeight: 1.7 }}>
+          <p className="text-white/70 text-sm sm:text-base max-w-lg mb-6 sm:mb-8 leading-relaxed">
             {t('app.description')}
           </p>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
+          
+          <div className="flex flex-wrap items-center gap-4 sm:gap-6 w-full sm:w-auto">
             {total > 0 && (
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
-                <span style={{ fontFamily: '"Playfair Display", serif', fontSize: 'clamp(22px, 4vw, 32px)', fontWeight: 700, color: '#fff', lineHeight: 1 }}>{total.toLocaleString()}</span>
-                <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: 13 }}>{t('common.records')}</span>
+              <div className="flex items-baseline gap-2">
+                <span className="font-serif text-3xl sm:text-4xl font-bold text-white">{total.toLocaleString()}</span>
+                <span className="text-white/60 text-xs sm:text-sm">{t('common.records')}</span>
               </div>
             )}
-            <Link to="/chat" style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '9px 18px', borderRadius: 10, background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.25)', color: '#fff', textDecoration: 'none', fontSize: 13, fontWeight: 600 }}>
+            <Link to="/chat" className="w-full sm:w-auto text-center px-6 py-3 rounded-xl bg-white/15 border border-white/20 text-white font-semibold text-sm hover:bg-white/25 transition-all">
               {t('nav.chat')}
             </Link>
           </div>
         </div>
       </div>
 
-      {/* Stats */}
+      {/* Stats Bar */}
       <StatsBar />
 
-      {/* Tabs */}
-      <div style={{ display: 'inline-flex', gap: 4, background: '#eef2f7', borderRadius: 12, padding: 4, marginBottom: 20, width: '100%', boxSizing: 'border-box' }}>
+      {/* Mobile Tabs */}
+      <div className="flex bg-slate-200/60 p-1.5 rounded-xl mb-6 sm:mb-8">
         {[
           { id: 'people', label: t('nav.home') },
           { id: 'facts',  label: t('nav.history') },
         ].map(tb => (
-          <button
-            key={tb.id}
-            onClick={() => setTab(tb.id)}
-            style={{
-              flex: 1, padding: '8px 16px', borderRadius: 9, border: 'none',
-              fontSize: 13.5, fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s',
-              background: tab === tb.id ? '#fff' : 'transparent',
-              color: tab === tb.id ? '#1a2332' : '#94a3b8',
-              boxShadow: tab === tb.id ? '0 1px 4px rgba(0,0,0,0.08)' : 'none',
-            }}
-          >
+          <button key={tb.id} onClick={() => setTab(tb.id)}
+            className={`flex-1 py-2.5 rounded-lg text-sm font-semibold transition-all ${
+              tab === tb.id ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+            }`}>
             {tb.label}
           </button>
         ))}
       </div>
 
-      {/* Content grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) clamp(260px, 28%, 340px)', gap: 20 }}>
-
-        {/* Main col */}
-        <div>
-          {/* People tab */}
-          <div style={{ display: tab === 'people' ? 'block' : 'none' }}>
+      {/* Main Grid */}
+      <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
+        
+        {/* Left Column (Content) */}
+        <div className="flex-1 min-w-0">
+          
+          {/* People Tab */}
+          <div className={tab === 'people' ? 'block' : 'hidden'}>
             <SearchBar onSearch={handleSearch} />
+            
             {!loading && persons.length > 0 && (
-              <p style={{ color: '#94a3b8', fontSize: 12, margin: '10px 0 4px 4px' }}>
-                {t('common.total')}: <strong style={{ color: '#5a7590' }}>{total}</strong> {t('common.records')}
+              <p className="text-xs text-slate-400 mt-4 mb-2 pl-1">
+                {t('common.total')}: <strong className="text-slate-600">{total}</strong> {t('common.records')}
               </p>
             )}
-            <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 8 }}>
+            
+            <div className="flex flex-col gap-3 mt-3">
               {loading ? (
-                [...Array(5)].map((_, i) => <div key={i} style={{ height: 82, borderRadius: 16, background: '#eef2f7' }} className="skeleton" />)
+                [...Array(5)].map((_, i) => <div key={i} className="h-24 bg-slate-100 rounded-2xl animate-pulse" />)
               ) : persons.length === 0 ? (
-                <div className="card" style={{ padding: '56px 24px', textAlign: 'center' }}>
-                  <div style={{ fontSize: 38, marginBottom: 10, opacity: 0.4 }}>🕊</div>
-                  <p style={{ fontFamily: '"Playfair Display", serif', color: '#94a3b8', fontSize: 16, margin: '0 0 4px' }}>{t('person.notFound')}</p>
-                  <p style={{ color: '#b8c8d8', fontSize: 12, margin: 0 }}>{t('person.notFoundSubtext')}</p>
+                <div className="bg-white border border-slate-100 rounded-2xl p-12 text-center shadow-sm">
+                  <div className="text-4xl mb-4 opacity-40">🕊</div>
+                  <p className="font-serif text-lg text-slate-600 mb-1">{t('person.notFound')}</p>
+                  <p className="text-xs text-slate-400">{t('person.notFoundSubtext')}</p>
                 </div>
               ) : (
                 persons.map(p => <PersonCard key={p.id} person={p} onClick={setSelectedPersonId} />)
               )}
             </div>
+            
             {totalPages > 1 && (
-              <div style={{ marginTop: 16 }}>
+              <div className="mt-6">
                 <Pagination currentPage={page} totalPages={totalPages} onPageChange={(p) => load(params, p)} />
               </div>
             )}
           </div>
 
-          {/* Facts tab */}
-          <div style={{ display: tab === 'facts' ? 'block' : 'none' }}>
+          {/* Facts Tab */}
+          <div className={tab === 'facts' ? 'block' : 'hidden'}>
             <FactsTab />
           </div>
         </div>
 
-        {/* Sidebar */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        {/* Right Column (Sidebar) */}
+        <div className="w-full lg:w-80 shrink-0 flex flex-col gap-6 order-last">
           <MapVisualization />
-          <div className="card" style={{ padding: '18px 20px' }}>
-            <p style={{ fontFamily: '"Playfair Display", serif', fontWeight: 600, fontSize: 14, color: '#1a2332', margin: '0 0 8px', display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span>📖</span>{t('about.title')}
-            </p>
-            <p style={{ color: '#7d95ab', fontSize: 13, lineHeight: 1.7, margin: '0 0 14px' }}>
+          <div className="bg-white border border-slate-100 rounded-2xl p-5 shadow-sm">
+            <h3 className="font-serif font-bold text-slate-800 flex items-center gap-2 mb-3">
+              <span>📖</span> {t('about.title')}
+            </h3>
+            <p className="text-sm text-slate-500 leading-relaxed mb-5">
               {t('about.description')}
             </p>
-            <div style={{ borderTop: '1px solid #eef2f7', paddingTop: 12 }}>
-              <Link to="/chat" className="btn-primary" style={{ width: '100%', justifyContent: 'center', textDecoration: 'none', fontSize: 13, display: 'flex' }}>
+            <div className="pt-4 border-t border-slate-100">
+              <Link to="/chat" className="w-full flex justify-center px-4 py-2.5 rounded-xl bg-primary-600 text-white font-medium text-sm hover:bg-primary-700 transition-colors shadow-sm">
                 {t('chat.askButton')}
               </Link>
             </div>
@@ -161,18 +155,8 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* Mobile: sidebar goes below on small screens */}
-      <style>{`
-        @media (max-width: 700px) {
-          .home-page-grid { grid-template-columns: 1fr !important; }
-          .home-page-sidebar { order: 3; }
-        }
-      `}</style>
       {selectedPersonId && (
-        <PersonModal
-          personId={selectedPersonId}
-          onClose={() => setSelectedPersonId(null)}
-        />
+        <PersonModal personId={selectedPersonId} onClose={() => setSelectedPersonId(null)} />
       )}
     </div>
   )

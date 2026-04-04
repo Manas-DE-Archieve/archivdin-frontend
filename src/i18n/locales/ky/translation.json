@@ -111,6 +111,7 @@
   "admin.title": "Модератор панели",
   "admin.verify": "Текшерүү",
   "admin.reject": "Четке кагуу",
+  "nav.voice" : "Ун Чат",
   "admin.pending": "Текшерүүнү күтүп жатат",
   "admin.userManagement": "Колдонуучуларды башкаруу",
   "admin.userManagementSubtitle": "Модератор ролдорун дайындоо.",

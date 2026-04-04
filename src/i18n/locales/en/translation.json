@@ -7,6 +7,7 @@
   "nav.documents": "Documents",
   "nav.admin": "Moderation",
   "nav.login": "Login",
+  "nav.voice": "Voice Chat",
   "nav.logout": "Logout",
   "nav.history": "History",
   "search.placeholder": "Search by name...",

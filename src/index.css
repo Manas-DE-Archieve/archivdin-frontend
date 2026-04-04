@@ -609,4 +609,56 @@ img, svg { max-width: 100%; }
 @media (max-width: 768px) {
   button, a[href] { min-height: 36px; }
   input, select, textarea { font-size: 16px !important; } /* Prevents iOS zoom */
+}/* ─── Фиксы для мобильных устройств ───────────────────────── */
+@layer base {
+  html, body {
+    overflow-x: hidden;
+    /* Убирает прыжок экрана при появлении скролла */
+    scrollbar-gutter: stable;
+  }
+}
+
+/* Поддержка безопасных зон на iPhone и отступы */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 16px);
+}
+
+/* Фикс высоты на мобилках (убирает прыжки при скролле браузера) */
+@supports (height: 100dvh) {
+  .h-\[calc\(100dvh-3\.5rem\)\] {
+    height: calc(100dvh - 3.5rem) !important;
+  }
+}
+
+/* Предотвращение автозума на iPhone при клике в input */
+@media screen and (max-width: 768px) {
+  input, textarea, select {
+    font-size: 16px !important;
+  }
+}
+
+/* Скроллбары для сайдбара и контента */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Скрытие скроллбара, но оставление прокрутки для мобильного сайдбара */
+.overflow-y-auto {
+  -webkit-overflow-scrolling: touch;
+}
+@media (max-width: 768px) {
+  aside .overflow-y-auto::-webkit-scrollbar {
+    display: none;
+  }
 }
