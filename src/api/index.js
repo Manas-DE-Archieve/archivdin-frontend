@@ -4,7 +4,6 @@ const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000/api',
 });
 
-// Автоматически добавляем токен ко всем запросам
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('access_token');
   if (token) {
@@ -81,6 +80,11 @@ export const chatApi = {
 export const adminApi = {
   listUsers: (params) => api.get('/admin/users', { params }),
   updateUserRole: (id, role) => api.patch(`/admin/users/${id}/role`, { role }),
+};
+
+export const setupApi = {
+  setupSuperAdmin: (email, password) =>
+    api.post('/auth/setup-super-admin', { email, password }),
 };
 
 export default api;

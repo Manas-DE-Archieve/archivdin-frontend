@@ -1,6 +1,6 @@
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Link } from 'react-router-dom'
-import { useTranslation } from '../../node_modules/react-i18next'
+import { useTranslation } from 'react-i18next'
 import { personsApi } from '../api'
 import PersonCard from '../components/PersonCard'
 import SearchBar from '../components/SearchBar'
@@ -10,6 +10,26 @@ import FactsTab from '../components/FactsTab'
 
 const PAGE_SIZE = 10
 
+const PeopleIcon = () => (
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+    <circle cx="9" cy="7" r="4"/>
+    <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+    <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+  </svg>
+)
+const BookIcon = () => (
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+    <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+  </svg>
+)
+const ChatIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+  </svg>
+)
+
 export default function HomePage() {
   const { t } = useTranslation()
   const [tab, setTab] = useState('people')
@@ -18,7 +38,6 @@ export default function HomePage() {
   const [page, setPage] = useState(1)
   const [params, setParams] = useState({})
   const [loading, setLoading] = useState(false)
-  const listRef = useRef(null)
 
   const load = useCallback(async (searchParams, p = 1) => {
     setLoading(true)
@@ -39,113 +58,194 @@ export default function HomePage() {
   const handleSearch = (p) => { setParams(p); load(p, 1) }
   const totalPages = Math.ceil(total / PAGE_SIZE)
 
-  const sidebar = (
-    <div className="space-y-4">
-      <MapVisualization />
-      <div className="card p-5 space-y-3">
-        <div className="flex items-center gap-2">
-          <div className="w-4 h-px bg-primary-300/50" />
-          <p className="font-serif font-semibold text-slate-800 text-sm">О проекте</p>
-        </div>
-        <p className="text-xs text-slate-500 leading-relaxed">
-          «Архивдин Үнү» — цифровой мемориал жертв политических репрессий 1918–1953 гг.
-          на территории современного Кыргызстана.
-        </p>
-        <div className="divider-navy" />
-        <Link to="/chat" className="btn-primary w-full justify-center !text-xs">
-          Спросить ИИ-архивариуса
-        </Link>
-      </div>
-    </div>
-  )
-
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-7">
+    <div style={{ maxWidth: 1200, margin: '0 auto', padding: '32px 24px' }}>
+      
       {/* Hero */}
-      <div className="relative rounded-2xl overflow-hidden bg-primary-800 px-8 py-10 shadow-card-lg">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary-900/80 via-primary-800 to-primary-700/90 pointer-events-none" />
-        <div className="absolute right-0 top-0 w-1/3 h-full bg-gradient-to-l from-white/5 to-transparent pointer-events-none" />
-        <div className="relative">
-          <div className="flex items-center gap-2 mb-3">
-            <div className="w-6 h-px bg-primary-300/60" />
-            <span className="text-primary-200 text-[10px] font-semibold tracking-[0.25em] uppercase">1918–1953</span>
-            <div className="w-6 h-px bg-primary-300/60" />
+      <div style={{
+        borderRadius: 24,
+        overflow: 'hidden',
+        background: 'linear-gradient(135deg, #1a3a5c 0%, #1e4d78 40%, #16639e 100%)',
+        padding: '48px 48px',
+        marginBottom: 32,
+        position: 'relative',
+      }}>
+        {/* Decorative elements */}
+        <div style={{
+          position: 'absolute', top: 0, right: 0,
+          width: '40%', height: '100%',
+          background: 'radial-gradient(ellipse at right, rgba(255,255,255,0.05) 0%, transparent 70%)',
+          pointerEvents: 'none',
+        }} />
+        <div style={{
+          position: 'absolute', bottom: -40, left: -40,
+          width: 200, height: 200, borderRadius: '50%',
+          background: 'rgba(255,255,255,0.03)',
+          pointerEvents: 'none',
+        }} />
+        
+        <div style={{ position: 'relative' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+            <div style={{ height: 1, width: 32, background: 'rgba(255,255,255,0.3)' }} />
+            <span style={{
+              color: 'rgba(255,255,255,0.6)', fontSize: 11,
+              fontWeight: 700, letterSpacing: 3, textTransform: 'uppercase',
+            }}>
+              1918 — 1953
+            </span>
+            <div style={{ height: 1, width: 32, background: 'rgba(255,255,255,0.3)' }} />
           </div>
-          <h1 className="font-serif text-4xl font-bold text-white leading-tight mb-2">{t('app.title')}</h1>
-          <p className="text-slate-300 text-sm max-w-lg leading-relaxed">{t('app.description')}</p>
-          {total > 0 && (
-            <div className="mt-4 flex items-center gap-1.5 text-sm">
-              <span className="text-primary-300 font-semibold font-serif text-lg">{total.toLocaleString()}</span>
-              <span className="text-slate-400">{t('common.records')}</span>
-            </div>
-          )}
+
+          <h1 style={{
+            fontFamily: '"Playfair Display", serif',
+            fontSize: 42, fontWeight: 700,
+            color: '#fff', margin: '0 0 12px',
+            letterSpacing: 0.5, lineHeight: 1.2,
+          }}>
+            Архивдин Үнү
+          </h1>
+          <p style={{
+            color: 'rgba(255,255,255,0.65)', fontSize: 15,
+            maxWidth: 520, margin: '0 0 28px', lineHeight: 1.7,
+          }}>
+            {t('app.description')}
+          </p>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
+            {total > 0 && (
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
+                <span style={{
+                  fontFamily: '"Playfair Display", serif',
+                  fontSize: 32, fontWeight: 700, color: '#fff', lineHeight: 1,
+                }}>
+                  {total.toLocaleString()}
+                </span>
+                <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: 13 }}>
+                  {t('common.records')}
+                </span>
+              </div>
+            )}
+            <Link
+              to="/chat"
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: 7,
+                padding: '10px 20px', borderRadius: 10,
+                background: 'rgba(255,255,255,0.15)',
+                border: '1px solid rgba(255,255,255,0.25)',
+                color: '#fff', textDecoration: 'none',
+                fontSize: 13, fontWeight: 600,
+                backdropFilter: 'blur(10px)',
+                transition: 'all 0.2s',
+              }}
+              onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.22)'}
+              onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.15)'}
+            >
+              <ChatIcon />
+              {t('nav.chat')}
+            </Link>
+          </div>
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 bg-slate-100 rounded-xl p-1 w-fit">
-        {[{ id: 'people', label: '👤 Люди' }, { id: 'facts', label: '📖 История' }].map(tb => (
+      <div style={{
+        display: 'inline-flex', gap: 4,
+        background: '#eef2f7', borderRadius: 12, padding: 4,
+        marginBottom: 24,
+      }}>
+        {[
+          { id: 'people', Icon: PeopleIcon, label: t('nav.home') },
+          { id: 'facts',  Icon: BookIcon,   label: 'История' },
+        ].map(tb => (
           <button
             key={tb.id}
             onClick={() => setTab(tb.id)}
-            className={`px-5 py-2 rounded-lg text-sm font-medium transition-all ${
-              tab === tb.id ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-700'
-            }`}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 7,
+              padding: '8px 18px', borderRadius: 9, border: 'none',
+              fontSize: 13.5, fontWeight: 600, cursor: 'pointer',
+              transition: 'all 0.2s',
+              background: tab === tb.id ? '#fff' : 'transparent',
+              color: tab === tb.id ? '#1a2332' : '#94a3b8',
+              boxShadow: tab === tb.id ? '0 1px 4px rgba(0,0,0,0.08)' : 'none',
+            }}
           >
+            <tb.Icon />
             {tb.label}
           </button>
         ))}
       </div>
 
-      {/* Content — both tabs rendered, hidden via CSS to avoid remount/reload */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className={`lg:col-span-2 space-y-3 ${tab === 'people' ? '' : 'hidden'}`}>
+      {/* Content */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: 24 }}>
+        {/* People tab */}
+        <div style={{ display: tab === 'people' ? 'block' : 'none' }}>
           <SearchBar onSearch={handleSearch} />
+          
           {!loading && persons.length > 0 && (
-            <p className="text-xs text-slate-400 px-1">
-              {t('common.total')}: <strong className="text-slate-600">{total}</strong> {t('common.records')}
+            <p style={{ color: '#94a3b8', fontSize: 12, margin: '12px 0 8px 4px' }}>
+              {t('common.total')}: <strong style={{ color: '#5a7590' }}>{total}</strong> {t('common.records')}
             </p>
           )}
-          <div ref={listRef} className={`space-y-2 transition-opacity duration-200 ${loading ? 'opacity-40 pointer-events-none' : 'opacity-100'}`}>
-            {loading && persons.length === 0 ? (
+
+          <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {loading ? (
               [...Array(5)].map((_, i) => (
-                <div key={i} className="card p-5">
-                  <div className="flex gap-4">
-                    <div className="w-0.5 h-12 skeleton" />
-                    <div className="flex-1 space-y-2">
-                      <div className="h-4 skeleton w-2/3 rounded" />
-                      <div className="h-3 skeleton w-1/3 rounded" />
-                    </div>
-                  </div>
-                </div>
+                <div key={i} style={{ height: 82, borderRadius: 16, background: '#eef2f7' }} className="skeleton" />
               ))
             ) : persons.length === 0 ? (
-              <div className="card p-14 text-center page-fade-in">
-                <p className="text-4xl mb-3 opacity-40">🕊</p>
-                <p className="font-serif text-slate-500">{t('person.notFound')}</p>
-                <p className="text-xs text-slate-400 mt-1">Попробуйте изменить параметры поиска</p>
+              <div className="card" style={{ padding: '64px 24px', textAlign: 'center' }}>
+                <div style={{ fontSize: 40, marginBottom: 12, opacity: 0.4 }}>🕊</div>
+                <p style={{ fontFamily: '"Playfair Display", serif', color: '#94a3b8', fontSize: 16, margin: '0 0 4px' }}>
+                  {t('person.notFound')}
+                </p>
+                <p style={{ color: '#b8c8d8', fontSize: 12 }}>Попробуйте изменить параметры поиска</p>
               </div>
             ) : (
               persons.map(p => <PersonCard key={p.id} person={p} />)
             )}
           </div>
+
           {totalPages > 1 && (
-            <Pagination
-              currentPage={page}
-              totalPages={totalPages}
-              onPageChange={(p) => load(params, p)}
-              scrollRef={listRef}
-            />
+            <div style={{ marginTop: 16 }}>
+              <Pagination currentPage={page} totalPages={totalPages} onPageChange={(p) => load(params, p)} />
+            </div>
           )}
         </div>
 
         {/* Facts tab */}
-        <div className={`lg:col-span-2 ${tab === 'facts' ? '' : 'hidden'}`}>
+        <div style={{ display: tab === 'facts' ? 'block' : 'none' }}>
           <FactsTab />
         </div>
 
-        {/* Sidebar — always visible */}
-        <div className="space-y-4">{sidebar}</div>
+        {/* Sidebar */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <MapVisualization />
+          <div className="card" style={{ padding: '20px 22px' }}>
+            <p style={{
+              fontFamily: '"Playfair Display", serif',
+              fontWeight: 600, fontSize: 14, color: '#1a2332',
+              margin: '0 0 10px', display: 'flex', alignItems: 'center', gap: 8,
+            }}>
+              <span style={{ fontSize: 16 }}>📖</span>
+              О проекте
+            </p>
+            <p style={{ color: '#7d95ab', fontSize: 13, lineHeight: 1.7, margin: '0 0 16px' }}>
+              «Архивдин Үнү» — цифровой мемориал жертв политических репрессий 1918–1953 гг.
+              на территории современного Кыргызстана.
+            </p>
+            <div style={{ borderTop: '1px solid #eef2f7', paddingTop: 14 }}>
+              <Link
+                to="/chat"
+                className="btn-primary"
+                style={{ width: '100%', justifyContent: 'center', textDecoration: 'none', fontSize: 13, display: 'flex' }}
+              >
+                <ChatIcon />
+                Спросить ИИ-архивариуса
+              </Link>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   )
