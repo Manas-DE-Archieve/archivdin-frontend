@@ -4,48 +4,55 @@ import { useTranslation } from 'react-i18next'
 import { documentsApi } from '../api'
 import DuplicateWarning from './DuplicateWarning'
 
-export default function FileUploader({ onUploaded }) {
+export default function FileUploader({ onUploaded, disabled, onDisabledClick }) {
   const { t } = useTranslation()
-  const [uploading, setUploading] = useState(false)
+  const [phase, setPhase] = useState(null) // null | 'checking' | 'uploading'
+  const [droppedFiles, setDroppedFiles] = useState([])
   const [error, setError] = useState('')
-  // duplicateState: { files: File[], similar: SimilarDocument[] } | null
   const [duplicateState, setDuplicateState] = useState(null)
 
+  const busy = phase !== null
+
   const performUpload = useCallback(async (files) => {
-    setUploading(true)
+    setPhase('uploading')
     setError('')
     const results = await Promise.allSettled(files.map(f => documentsApi.upload(f)))
     const failed = results.filter(r => r.status === 'rejected')
     const succeeded = results.filter(r => r.status === 'fulfilled')
     if (failed.length > 0) {
-      setError(
-        failed.map(f => f.reason.response?.data?.detail || t('common.error')).join('\n')
-      )
+      const msg = failed
+        .map(f => f.reason?.response?.data?.detail || f.reason?.message || 'Ошибка загрузки')
+        .join('\n')
+      setError(msg)
     }
     if (succeeded.length > 0) onUploaded?.()
-    setUploading(false)
-  }, [onUploaded, t])
+    setDroppedFiles([])
+    setPhase(null)
+  }, [onUploaded])
 
   const onDrop = useCallback(async (acceptedFiles) => {
     if (!acceptedFiles.length) return
-    setError('')
+    if (disabled) { onDisabledClick?.(); return }
 
-    // Check each file for duplicates before uploading
+    setError('')
+    setDroppedFiles(acceptedFiles)
+    setPhase('checking')
+
     for (const file of acceptedFiles) {
       try {
         const res = await documentsApi.checkDuplicates(file)
         if (res.data.duplicates_found) {
-          // Pause and ask user — attach all pending files to state
+          setPhase(null)
           setDuplicateState({ files: acceptedFiles, similar: res.data.similar_documents })
           return
         }
       } catch {
-        // If check fails (e.g. 401), just proceed with upload
+        // proceed anyway
       }
     }
 
     await performUpload(acceptedFiles)
-  }, [performUpload])
+  }, [performUpload, disabled, onDisabledClick])
 
   const handleConfirm = useCallback(async () => {
     const files = duplicateState?.files || []
@@ -55,43 +62,68 @@ export default function FileUploader({ onUploaded }) {
 
   const handleCancel = useCallback(() => {
     setDuplicateState(null)
+    setDroppedFiles([])
   }, [])
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: { 'text/plain': ['.txt'], 'text/markdown': ['.md'], 'application/pdf': ['.pdf'] },
-    disabled: uploading,
+    disabled: busy,
   })
+
+  const phaseLabel = {
+    checking: 'Проверяем дубликаты...',
+    uploading: 'Загружаем файл...',
+  }
 
   return (
     <div>
       <div
         {...getRootProps()}
-        className={`relative border-2 border-dashed rounded-xl p-10 text-center cursor-pointer transition-all duration-200 ${
-          isDragActive
-            ? 'border-primary-400 bg-primary-50/50 shadow-navy scale-[1.01]'
-            : 'border-slate-300 hover:border-primary-300 hover:bg-slate-50'
-        } ${uploading ? 'opacity-50 cursor-not-allowed' : ''}`}
+        onClick={disabled ? (e) => { e.stopPropagation(); onDisabledClick?.() } : getRootProps().onClick}
+        className={`relative border-2 border-dashed rounded-xl p-10 text-center transition-all duration-200 ${
+          disabled
+            ? 'border-slate-200 bg-slate-50 cursor-pointer opacity-60'
+            : busy
+            ? 'border-primary-300 bg-primary-50/30 cursor-wait'
+            : isDragActive
+            ? 'border-primary-400 bg-primary-50/50 scale-[1.01] cursor-copy'
+            : 'border-slate-300 hover:border-primary-300 hover:bg-slate-50 cursor-pointer'
+        }`}
       >
-        <input {...getInputProps()} />
-        <div className="text-4xl mb-3 transition-transform duration-200 select-none">
-          {isDragActive ? '📂' : '📄'}
-        </div>
-        <p className="font-medium text-slate-600">
-          {uploading ? t('documents.uploading') : isDragActive ? 'Отпустите файлы...' : t('documents.drop')}
-        </p>
-        <p className="text-xs text-slate-400 mt-1.5">{t('documents.types')}</p>
-        {uploading && (
-          <div className="absolute inset-0 flex items-center justify-center rounded-xl bg-white/60">
-            <div className="w-6 h-6 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
+        <input {...getInputProps()} disabled={busy || disabled} />
+
+        {busy ? (
+          /* Single spinner state — replaces everything inside */
+          <div className="flex flex-col items-center gap-3 py-2">
+            <div className="w-8 h-8 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
+            <p className="text-sm font-medium text-primary-600">{phaseLabel[phase]}</p>
+            {droppedFiles.length > 0 && (
+              <div className="flex flex-wrap justify-center gap-1.5 mt-1">
+                {droppedFiles.map((f, i) => (
+                  <span key={i} className="inline-flex items-center gap-1 text-xs bg-primary-100 text-primary-700 rounded-full px-2.5 py-0.5">
+                    📎 {f.name}
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
+        ) : (
+          /* Idle state */
+          <>
+            <div className="text-4xl mb-3 select-none">{isDragActive ? '📂' : '📄'}</div>
+            <p className="font-medium text-slate-600">
+              {isDragActive ? 'Отпустите файлы...' : t('documents.drop')}
+            </p>
+            <p className="text-xs text-slate-400 mt-1.5">{t('documents.types')}</p>
+          </>
         )}
       </div>
 
       {error && (
-        <pre className="mt-2.5 text-sm text-red-600 whitespace-pre-wrap font-sans bg-red-50 p-2 rounded-md">
+        <div className="mt-2.5 text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg p-3 whitespace-pre-wrap">
           {error}
-        </pre>
+        </div>
       )}
 
       {duplicateState && (

@@ -16,7 +16,26 @@ const STATUS_STYLES = {
   failed_extraction: { label: 'Ошибка ИИ', class: 'badge-rejected' },
 };
 
-export default function DocumentsPage() {
+const LockBanner = ({ onOpenLogin }) => (
+  <div
+    className="flex items-center gap-3 px-4 py-3 rounded-xl border border-amber-200 bg-amber-50 cursor-pointer select-none"
+    onClick={onOpenLogin}
+  >
+    <span className="text-xl">🔒</span>
+    <div className="flex-1 min-w-0">
+      <p className="text-sm font-medium text-amber-800">Только для зарегистрированных</p>
+      <p className="text-xs text-amber-600 mt-0.5">Войдите или создайте аккаунт, чтобы загружать документы</p>
+    </div>
+    <button
+      onClick={onOpenLogin}
+      className="shrink-0 text-xs font-semibold px-3 py-1.5 rounded-lg bg-amber-500 text-white hover:bg-amber-600 transition-colors"
+    >
+      Войти
+    </button>
+  </div>
+);
+
+export default function DocumentsPage({ onOpenLogin }) {
   const { t } = useTranslation();
   const { user } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -57,12 +76,12 @@ export default function DocumentsPage() {
   };
 
   const handleViewDoc = async (id) => {
-    setViewingDoc({ id }); 
+    setViewingDoc({ id });
     try {
       const { data } = await documentsApi.get(id);
       setViewingDoc(data);
     } catch (error) {
-      console.error("Failed to fetch document content", error);
+      console.error('Failed to fetch document content', error);
       setViewingDoc(null);
     }
   };
@@ -99,6 +118,8 @@ export default function DocumentsPage() {
     <>
       {viewingDoc && <DocumentViewerModal doc={viewingDoc} onClose={() => setViewingDoc(null)} />}
       <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 space-y-7">
+
+        {/* Header */}
         <div className="flex items-start justify-between gap-4">
           <div>
             <h1 className="font-serif text-2xl font-bold text-primary-800">{t('documents.title')}</h1>
@@ -108,8 +129,14 @@ export default function DocumentsPage() {
           </div>
           {user && ['moderator', 'super_admin'].includes(user.role) && (
             <div className="shrink-0 text-right">
-              <button onClick={handleGenerateFacts} disabled={generating} className="btn-outline !text-xs !py-2 !px-3 flex items-center gap-1.5">
-                {generating ? <span className="w-3 h-3 border border-slate-400 border-t-transparent rounded-full animate-spin" /> : '✨'}
+              <button
+                onClick={handleGenerateFacts}
+                disabled={generating}
+                className="btn-outline !text-xs !py-2 !px-3 flex items-center gap-1.5"
+              >
+                {generating
+                  ? <span className="w-3 h-3 border border-slate-400 border-t-transparent rounded-full animate-spin" />
+                  : '✨'}
                 Сгенерировать факты
               </button>
               {genMsg && <p className="text-[11px] mt-1 text-slate-500">{genMsg}</p>}
@@ -117,17 +144,47 @@ export default function DocumentsPage() {
           )}
         </div>
 
-        {user && (
-          <div className="card p-5">
-            <p className="field-label mb-3">Загрузить документ</p>
-            <FileUploader onUploaded={handleUploaded} />
-          </div>
-        )}
+        {/* Upload block — always visible */}
+        <div className="card p-5 space-y-3">
+          <p className="field-label">Загрузить документ</p>
 
+          {/* Lock banner for guests */}
+          {!user && <LockBanner onOpenLogin={onOpenLogin} />}
+
+          {/* Uploader: visible always, disabled for guests */}
+          <div className={!user ? 'pointer-events-none' : ''}>
+            <FileUploader
+              onUploaded={handleUploaded}
+              disabled={!user}
+              onDisabledClick={onOpenLogin}
+            />
+          </div>
+        </div>
+
+        {/* Document list */}
         <div>
           <div className="flex border-b border-slate-200 mb-4">
-            <button onClick={() => setScope('all')} className={`px-4 py-2 text-sm font-medium ${scope === 'all' ? 'border-b-2 border-primary-500 text-primary-600' : 'text-slate-500'}`}>Все документы</button>
-            {user && <button onClick={() => setScope('my')} className={`px-4 py-2 text-sm font-medium ${scope === 'my' ? 'border-b-2 border-primary-500 text-primary-600' : 'text-slate-500'}`}>Мои документы</button>}
+            <button
+              onClick={() => setScope('all')}
+              className={`px-4 py-2 text-sm font-medium ${scope === 'all' ? 'border-b-2 border-primary-500 text-primary-600' : 'text-slate-500'}`}
+            >
+              Все документы
+            </button>
+
+            {/* "My documents" tab — visible but locked for guests */}
+            <button
+              onClick={() => user ? setScope('my') : onOpenLogin?.()}
+              className={`px-4 py-2 text-sm font-medium flex items-center gap-1.5 transition-colors ${
+                user
+                  ? scope === 'my'
+                    ? 'border-b-2 border-primary-500 text-primary-600'
+                    : 'text-slate-500 hover:text-slate-700'
+                  : 'text-slate-300 cursor-pointer hover:text-slate-400'
+              }`}
+            >
+              {!user && <span className="text-xs">🔒</span>}
+              Мои документы
+            </button>
           </div>
 
           <div className="space-y-2">
@@ -142,22 +199,40 @@ export default function DocumentsPage() {
               docs.map(doc => {
                 const statusInfo = STATUS_STYLES[doc.status] || { label: doc.status, class: 'badge' };
                 return (
-                  <div key={doc.id} onClick={() => handleViewDoc(doc.id)} className="card-hover p-4 flex items-center gap-4 cursor-pointer">
+                  <div
+                    key={doc.id}
+                    onClick={() => handleViewDoc(doc.id)}
+                    className="card-hover p-4 flex items-center gap-4 cursor-pointer"
+                  >
                     <div className="text-2xl shrink-0">{TYPE_ICON[doc.file_type] || '📄'}</div>
                     <div className="flex-1 min-w-0">
                       <p className="font-medium text-sm text-slate-800 truncate">{doc.filename}</p>
-                      <p className="text-xs text-slate-400 mt-0.5">{new Date(doc.uploaded_at).toLocaleDateString('ru-RU')}</p>
+                      <p className="text-xs text-slate-400 mt-0.5">
+                        {new Date(doc.uploaded_at).toLocaleDateString('ru-RU')}
+                      </p>
                     </div>
                     <span className={`${statusInfo.class} shrink-0`}>{statusInfo.label}</span>
                     {user && (user.role !== 'user' || user.id === doc.uploaded_by) && (
-                      <button onClick={(e) => handleDelete(e, doc.id)} className="shrink-0 w-7 h-7 flex items-center justify-center rounded-lg text-slate-300 hover:text-red-500 hover:bg-red-50">✕</button>
+                      <button
+                        onClick={(e) => handleDelete(e, doc.id)}
+                        className="shrink-0 w-7 h-7 flex items-center justify-center rounded-lg text-slate-300 hover:text-red-500 hover:bg-red-50"
+                      >
+                        ✕
+                      </button>
                     )}
                   </div>
-                )
+                );
               })
             )}
           </div>
-          {totalPages > 1 && <Pagination currentPage={page} totalPages={totalPages} onPageChange={(p) => load(p, scope)} />}
+
+          {totalPages > 1 && (
+            <Pagination
+              currentPage={page}
+              totalPages={totalPages}
+              onPageChange={(p) => load(p, scope)}
+            />
+          )}
         </div>
       </div>
     </>

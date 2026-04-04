@@ -47,7 +47,7 @@ function AppContent() {
             </ProtectedRoute>
           } />
           <Route path="/chat" element={<ChatPage />} />
-          <Route path="/documents" element={<DocumentsPage />} />
+          <Route path="/documents" element={<DocumentsPage onOpenLogin={() => setLoginOpen(true)} />} />
           <Route path="/admin" element={
             <ProtectedRoute roles={['moderator', 'super_admin']} onOpenLogin={() => setLoginOpen(true)}>
               <AdminPage />
