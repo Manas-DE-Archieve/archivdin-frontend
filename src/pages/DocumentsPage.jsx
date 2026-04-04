@@ -7,7 +7,7 @@ import { useAuth } from '../hooks/useAuth';
 import Pagination from '../components/Pagination';
 import DocumentViewerModal from '../components/DocumentViewerModal';
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 5;
 const TYPE_ICON = { pdf: '📕', md: '📝', txt: '📄' };
 const STATUS_STYLES = {
   pending: { label: 'Ожидает', class: 'badge-pending' },

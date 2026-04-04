@@ -498,11 +498,12 @@ export default function ChatPage() {
         </div>
 
         {/* Input Area */}
-        <div className="border-t border-slate-100 bg-white p-3 md:p-4 pb-safe">
-          <div className="max-w-4xl mx-auto flex items-end gap-2">
+        <div className="border-t border-slate-100 bg-white px-4 py-3 pb-6 md:p-6 md:pb-8 shrink-0 shadow-[0_-10px_40px_rgba(0,0,0,0.02)] z-20">
+          <div className="max-w-4xl mx-auto flex items-end gap-2 sm:gap-3">
+            
             <textarea
               ref={textareaRef}
-              className="flex-1 bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all max-h-32"
+              className="flex-1 bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3.5 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all max-h-32 shadow-inner"
               rows={1}
               placeholder={t('chat.placeholder')}
               value={input}
@@ -514,17 +515,34 @@ export default function ChatPage() {
             <button
               onMouseDown={startRecording} onMouseUp={stopRecording} onTouchStart={e => { e.preventDefault(); startRecording() }} onTouchEnd={e => { e.preventDefault(); stopRecording() }}
               title="Удержите для записи" disabled={streaming}
-              className={`w-11 h-11 md:w-12 md:h-12 flex items-center justify-center rounded-xl shrink-0 transition-all ${recording ? 'bg-red-500 text-white scale-110 shadow-lg shadow-red-500/30' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}>
+              className={`w-12 h-12 flex items-center justify-center rounded-2xl shrink-0 transition-all ${
+                recording 
+                  ? 'bg-red-500 text-white scale-110 shadow-lg shadow-red-500/30' 
+                  : 'bg-slate-100 text-slate-500 hover:bg-slate-200 border border-slate-200'
+              }`}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill={recording ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/>
               </svg>
             </button>
 
             <button onClick={sendMessage} disabled={streaming || !input.trim() || !sessionId}
-              className="w-11 h-11 md:w-12 md:h-12 bg-primary-600 hover:bg-primary-700 disabled:opacity-50 disabled:bg-slate-200 disabled:text-slate-400 text-white rounded-xl flex items-center justify-center transition-all shrink-0">
-              {streaming ? <span className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" /> : <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>}
+              className="w-12 h-12 bg-primary-600 hover:bg-primary-700 disabled:opacity-50 disabled:bg-slate-200 disabled:text-slate-400 disabled:border-slate-200 border border-transparent text-white rounded-2xl flex items-center justify-center transition-all shrink-0 shadow-sm">
+              {streaming ? (
+                <span className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+              )}
             </button>
+
           </div>
+
+          {/* Подсказка, которая создает дополнительный визуальный баланс снизу */}
+          <p className="text-center text-[10px] text-slate-400 mt-3 md:mt-4 hidden sm:block">
+            {recording 
+              ? '🔴 Идёт запись — отпустите микрофон для отправки' 
+              : 'Enter — отправить · Удержите микрофон для голосового ввода'
+            }
+          </p>
         </div>
       </div>
     </div>

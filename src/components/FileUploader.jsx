@@ -8,7 +8,7 @@ export default function FileUploader({ onUploaded }) {
   const { t } = useTranslation()
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState('')
-  // duplicateState: { files: File[], similar: SimilarDocument[] } | null
+  // duplicateState: { files, similar, action, message } | null
   const [duplicateState, setDuplicateState] = useState(null)
 
   const performUpload = useCallback(async (files) => {
@@ -30,13 +30,26 @@ export default function FileUploader({ onUploaded }) {
     if (!acceptedFiles.length) return
     setError('')
 
-    // Check each file for duplicates before uploading
     for (const file of acceptedFiles) {
       try {
         const res = await documentsApi.checkDuplicates(file)
-        if (res.data.duplicates_found) {
-          // Pause and ask user — attach all pending files to state
-          setDuplicateState({ files: acceptedFiles, similar: res.data.similar_documents })
+        const { action, similar_documents, message } = res.data
+
+        if (action === 'block') {
+          // Hard block — show modal with no confirm button
+          setDuplicateState({ files: acceptedFiles, similar: similar_documents, action: 'block', message })
+          return
+        }
+
+        if (action === 'warn') {
+          // Soft warn — show modal, user can still confirm
+          setDuplicateState({ files: acceptedFiles, similar: similar_documents, action: 'warn', message })
+          return
+        }
+
+        // action === 'allow' — show similar docs info inline but proceed
+        if (similar_documents && similar_documents.length > 0) {
+          setDuplicateState({ files: acceptedFiles, similar: similar_documents, action: 'allow', message })
           return
         }
       } catch {
@@ -97,8 +110,10 @@ export default function FileUploader({ onUploaded }) {
       {duplicateState && (
         <DuplicateWarning
           mode="document"
+          action={duplicateState.action}
+          message={duplicateState.message}
           documents={duplicateState.similar}
-          onConfirm={handleConfirm}
+          onConfirm={duplicateState.action !== 'block' ? handleConfirm : undefined}
           onCancel={handleCancel}
         />
       )}

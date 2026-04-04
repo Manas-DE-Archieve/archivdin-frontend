@@ -2,7 +2,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { personsApi, adminApi } from '../api';
+import { personsApi, adminApi, factsApi } from '../api';
 import { useAuth } from '../hooks/useAuth';
 import Pagination from '../components/Pagination';
 
@@ -141,6 +141,21 @@ export default function AdminPage() {
 
   const totalPages = Math.ceil(total / PAGE_SIZE);
 
+  const [generatingFacts, setGeneratingFacts] = useState(false);
+  const [factsMsg, setFactsMsg] = useState('');
+  const handleGenerateFacts = async () => {
+    setGeneratingFacts(true);
+    setFactsMsg('');
+    try {
+      await factsApi.generate();
+      setFactsMsg('✓ Генерация запущена в фоне. Факты появятся через несколько минут.');
+    } catch {
+      setFactsMsg('✗ Ошибка при запуске генерации.');
+    } finally {
+      setGeneratingFacts(false);
+    }
+  };
+
   if (!user || !['moderator', 'super_admin'].includes(user.role)) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
@@ -166,6 +181,26 @@ export default function AdminPage() {
               <span className="text-xs font-semibold text-amber-700">{total} ожидают проверки</span>
             </div>
           )}
+        </div>
+
+        {/* Facts generation panel */}
+        <div className="card p-5 mt-6 flex flex-col sm:flex-row sm:items-center gap-4">
+          <div className="flex-1">
+            <p className="font-serif font-semibold text-slate-800 text-sm">Генерация фактов</p>
+            <p className="text-xs text-slate-400 mt-0.5">Запустить генерацию «Знаете ли вы?» для всех документов без фактов</p>
+            {factsMsg && (
+              <p className={`text-xs mt-1 font-medium ${factsMsg.startsWith('✓') ? 'text-emerald-600' : 'text-red-600'}`}>
+                {factsMsg}
+              </p>
+            )}
+          </div>
+          <button
+            onClick={handleGenerateFacts}
+            disabled={generatingFacts}
+            className="btn-primary !text-xs !py-2 !px-4 shrink-0 disabled:opacity-60"
+          >
+            {generatingFacts ? '⏳ Запуск...' : '✨ Сгенерировать факты'}
+          </button>
         </div>
 
         {loading ? (
