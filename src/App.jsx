@@ -13,6 +13,7 @@ import LoginPage from './pages/LoginPage'
 import SetupPage from './pages/SetupPage'
 import 'leaflet/dist/leaflet.css';
 import VoiceChatPage from './pages/VoiceChatPage'
+import { ToastContainer } from './components/Toast'
 
 function ProtectedRoute({ children, roles, onOpenLogin }) {
   const { user, loading } = useAuth()
@@ -49,7 +50,7 @@ function AppContent() {
           } />
           <Route path="/chat" element={<ChatPage />} />
           <Route path="/voice-chat" element={<VoiceChatPage />} />
-          <Route path="/documents" element={<DocumentsPage />} />
+          <Route path="/documents" element={<DocumentsPage onOpenLogin={() => setLoginOpen(true)} />} />
           <Route path="/admin" element={
             <ProtectedRoute roles={['moderator', 'super_admin']} onOpenLogin={() => setLoginOpen(true)}>
               <AdminPage />
@@ -60,6 +61,7 @@ function AppContent() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
+      <ToastContainer />
     </div>
   )
 }

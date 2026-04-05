@@ -1,16 +1,10 @@
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 
-/**
- * action: "warn"  → show warning, allow confirm or cancel
- *         "block" → show error, only close button (no confirm)
- * Always shows similar documents list with similarity % at the bottom.
- */
 export default function DuplicateWarning({ persons, documents, mode = 'person', action = 'warn', message, onConfirm, onCancel }) {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const items = mode === 'document' ? documents : persons
-
   const isBlocked = action === 'block'
 
   const handleDocClick = (id) => {
@@ -19,14 +13,19 @@ export default function DuplicateWarning({ persons, documents, mode = 'person', 
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-primary-900/60 backdrop-blur-sm p-4">
-      <div className="card max-w-lg w-full p-7 shadow-card-lg animate-slide-up">
+    <div
+      className="fixed inset-0 flex items-center justify-center p-4"
+      // zIndex 200: выше Navbar/sidebar, без backdrop-filter blur
+      style={{ zIndex: 200, backgroundColor: 'rgba(5, 18, 35, 0.78)' }}
+    >
+      <div
+        className="card max-w-lg w-full p-7 shadow-card-lg"
+        style={{ animation: 'modalSlideUp 0.18s ease', willChange: 'transform, opacity' }}
+      >
         <div className="mb-5">
           <div className="flex items-center gap-2.5 mb-2">
             <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm ring-1 ${
-              isBlocked
-                ? 'bg-red-50 ring-red-300'
-                : 'bg-amber-50 ring-amber-200'
+              isBlocked ? 'bg-red-50 ring-red-300' : 'bg-amber-50 ring-amber-200'
             }`}>
               {isBlocked ? '🚫' : '⚠'}
             </div>
@@ -47,7 +46,6 @@ export default function DuplicateWarning({ persons, documents, mode = 'person', 
 
         <div className="divider-navy mb-4" />
 
-        {/* Similar documents list — always shown */}
         {items && items.length > 0 && (
           <div className="space-y-2 max-h-64 overflow-y-auto pr-1 mb-5">
             {items.map(item => {
@@ -100,6 +98,8 @@ export default function DuplicateWarning({ persons, documents, mode = 'person', 
           )}
         </div>
       </div>
+
+      <style>{`@keyframes modalSlideUp{from{transform:translateY(16px);opacity:0}to{transform:translateY(0);opacity:1}}`}</style>
     </div>
   )
 }

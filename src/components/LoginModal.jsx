@@ -11,7 +11,6 @@ export default function LoginModal({ onClose }) {
   const [error, setError]       = useState('')
   const [loading, setLoading]   = useState(false)
 
-  // Close on Escape
   useEffect(() => {
     const handler = (e) => { if (e.key === 'Escape') onClose() }
     window.addEventListener('keydown', handler)
@@ -35,11 +34,16 @@ export default function LoginModal({ onClose }) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ backgroundColor: 'rgba(0,30,57,0.6)', backdropFilter: 'blur(4px)' }}
+      className="fixed inset-0 flex items-center justify-center p-4"
+      // z-[200]: выше Navbar (z-100) и сайдбара чата (z-50)
+      // Без backdrop-filter blur — главная причина лага
+      style={{ zIndex: 200, backgroundColor: 'rgba(5, 18, 35, 0.85)' }}
       onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
     >
-      <div className="w-full max-w-sm animate-slide-up">
+      <div
+        className="w-full max-w-sm"
+        style={{ animation: 'modalSlideUp 0.18s ease', willChange: 'transform, opacity' }}
+      >
         {/* Logo */}
         <div className="text-center mb-6">
           <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-primary-700 shadow-card-lg mb-3">
@@ -50,7 +54,6 @@ export default function LoginModal({ onClose }) {
         </div>
 
         <div className="card p-6 shadow-card-lg">
-          {/* Tab switcher */}
           <div className="flex rounded-lg overflow-hidden border border-slate-200 mb-5 bg-slate-50">
             {['login', 'register'].map(m => (
               <button
@@ -123,6 +126,8 @@ export default function LoginModal({ onClose }) {
           Отмена
         </button>
       </div>
+
+      <style>{`@keyframes modalSlideUp { from{transform:translateY(14px);opacity:0} to{transform:translateY(0);opacity:1} }`}</style>
     </div>
   )
 }

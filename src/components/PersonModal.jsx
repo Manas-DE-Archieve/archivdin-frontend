@@ -4,6 +4,14 @@ import { personsApi } from '../api'
 import { useAuth } from '../hooks/useAuth'
 import { Link } from 'react-router-dom'
 
+// Инжектируем keyframes один раз в <head>, не при каждом рендере
+if (typeof document !== 'undefined' && !document.getElementById('person-modal-kf')) {
+  const s = document.createElement('style')
+  s.id = 'person-modal-kf'
+  s.textContent = '@keyframes modalSlideUp{from{transform:translateY(16px);opacity:0}to{transform:translateY(0);opacity:1}}'
+  document.head.appendChild(s)
+}
+
 const Field = ({ label, value }) =>
   value ? (
     <div>
@@ -33,7 +41,6 @@ export default function PersonModal({ personId, onClose }) {
       .finally(() => setLoading(false))
   }, [personId])
 
-  // Close on Escape
   useEffect(() => {
     const handler = (e) => { if (e.key === 'Escape') onClose() }
     window.addEventListener('keydown', handler)
@@ -46,19 +53,14 @@ export default function PersonModal({ personId, onClose }) {
     try {
       await personsApi.setStatus(personId, newStatus)
       setPerson(prev => ({ ...prev, status: newStatus }))
-    } catch {
-      alert(t('person.statusError'))
-    }
+    } catch { /* use toast if needed */ }
   }
 
   const handleDelete = async () => {
-    if (!confirm(t('person.deleteConfirm'))) return
     try {
       await personsApi.delete(personId)
       onClose()
-    } catch {
-      alert(t('person.deleteError'))
-    }
+    } catch { /* use toast if needed */ }
   }
 
   const sc = person ? (STATUS_CONFIG[person.status] || STATUS_CONFIG.pending) : null
@@ -68,11 +70,11 @@ export default function PersonModal({ personId, onClose }) {
     <div
       onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
       style={{
-        position: 'fixed', inset: 0, zIndex: 50,
+        position: 'fixed', inset: 0, zIndex: 200,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         padding: 16,
-        background: 'rgba(10, 25, 45, 0.55)',
-        backdropFilter: 'blur(4px)',
+        // Без backdrop-filter blur — он вызывает лаг на любом браузере
+        backgroundColor: 'rgba(5, 18, 35, 0.78)',
       }}
     >
       <div style={{
@@ -84,29 +86,23 @@ export default function PersonModal({ personId, onClose }) {
         overflow: 'hidden',
         display: 'flex',
         flexDirection: 'column',
-        boxShadow: '0 20px 60px rgba(0,0,0,0.25)',
-        animation: 'slideUp 0.2s ease',
+        boxShadow: '0 20px 60px rgba(0,0,0,0.28)',
+        animation: 'modalSlideUp 0.18s ease',
+        willChange: 'transform, opacity',   // подсказка GPU — не пересчитывать layout
       }}>
 
         {/* Header */}
         <div style={{
           padding: '22px 24px 18px',
           borderBottom: '1px solid #f0f4f8',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'flex-start',
-          gap: 12,
-          flexShrink: 0,
+          display: 'flex', justifyContent: 'space-between',
+          alignItems: 'flex-start', gap: 12, flexShrink: 0,
         }}>
           {loading ? (
             <div style={{ height: 24, width: 200, borderRadius: 8, background: '#eef2f7' }} />
           ) : person ? (
             <div style={{ flex: 1, minWidth: 0 }}>
-              <h2 style={{
-                fontFamily: '"Playfair Display", serif',
-                fontSize: 20, fontWeight: 700,
-                color: '#1a2332', margin: '0 0 6px',
-              }}>
+              <h2 style={{ fontFamily: '"Playfair Display", serif', fontSize: 20, fontWeight: 700, color: '#1a2332', margin: '0 0 6px' }}>
                 {person.full_name}
               </h2>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
@@ -128,17 +124,12 @@ export default function PersonModal({ personId, onClose }) {
             <p style={{ color: '#94a3b8', fontSize: 14 }}>{t('person.notFoundRecord')}</p>
           )}
 
-          <button
-            onClick={onClose}
-            style={{
-              width: 32, height: 32, borderRadius: 10, border: 'none',
-              background: '#f0f4f8', color: '#7d95ab',
-              cursor: 'pointer', fontSize: 16, flexShrink: 0,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-            }}
-          >
-            ✕
-          </button>
+          <button onClick={onClose} style={{
+            width: 32, height: 32, borderRadius: 10, border: 'none',
+            background: '#f0f4f8', color: '#7d95ab',
+            cursor: 'pointer', fontSize: 16, flexShrink: 0,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>✕</button>
         </div>
 
         {/* Body */}
@@ -152,16 +143,15 @@ export default function PersonModal({ personId, onClose }) {
           ) : person ? (
             <>
               <dl style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px 24px' }}>
-                <Field label={t('person.occupation')}          value={person.occupation} />
-                <Field label={t('person.charge')}              value={person.charge} />
-                <Field label={t('person.arrestDate')}          value={person.arrest_date} />
-                <Field label={t('person.sentence')}            value={person.sentence} />
-                <Field label={t('person.sentenceDate')}        value={person.sentence_date} />
-                <Field label={t('person.rehabilitationDate')}  value={person.rehabilitation_date} />
-                <Field label={t('person.district')}            value={person.district} />
-                <Field label={t('person.source')}              value={person.source} />
+                <Field label={t('person.occupation')}         value={person.occupation} />
+                <Field label={t('person.charge')}             value={person.charge} />
+                <Field label={t('person.arrestDate')}         value={person.arrest_date} />
+                <Field label={t('person.sentence')}           value={person.sentence} />
+                <Field label={t('person.sentenceDate')}       value={person.sentence_date} />
+                <Field label={t('person.rehabilitationDate')} value={person.rehabilitation_date} />
+                <Field label={t('person.district')}           value={person.district} />
+                <Field label={t('person.source')}             value={person.source} />
               </dl>
-
               {person.biography && (
                 <div style={{ marginTop: 20, paddingTop: 20, borderTop: '1px solid #f0f4f8' }}>
                   <p style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#94a3b8', marginBottom: 8 }}>
@@ -179,59 +169,25 @@ export default function PersonModal({ personId, onClose }) {
         {/* Footer */}
         {!loading && person && (
           <div style={{
-            padding: '14px 24px',
-            borderTop: '1px solid #f0f4f8',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            gap: 10,
-            flexShrink: 0,
-            background: '#fafbfc',
+            padding: '14px 24px', borderTop: '1px solid #f0f4f8',
+            display: 'flex', justifyContent: 'space-between',
+            alignItems: 'center', gap: 10, flexShrink: 0, background: '#fafbfc',
           }}>
-            <Link
-              to={`/persons/${person.id}`}
-              style={{
-                fontSize: 12, color: '#3b9edb', textDecoration: 'none',
-                display: 'flex', alignItems: 'center', gap: 4,
-              }}
-            >
+            <Link to={`/persons/${person.id}`} style={{ fontSize: 12, color: '#3b9edb', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 4 }}>
               ↗ {t('person.personalFile')}
             </Link>
-
             {isModerator && (
               <div style={{ display: 'flex', gap: 8 }}>
-                <button
-                  onClick={() => handleSetStatus('verified')}
-                  disabled={person.status === 'verified'}
-                  style={{
-                    padding: '5px 12px', borderRadius: 8, border: '1px solid #c0ebd5',
-                    background: '#edfaf4', color: '#1a7f55', fontSize: 12, fontWeight: 600,
-                    cursor: person.status === 'verified' ? 'not-allowed' : 'pointer',
-                    opacity: person.status === 'verified' ? 0.5 : 1,
-                  }}
-                >
+                <button onClick={() => handleSetStatus('verified')} disabled={person.status === 'verified'}
+                  style={{ padding: '5px 12px', borderRadius: 8, border: '1px solid #c0ebd5', background: '#edfaf4', color: '#1a7f55', fontSize: 12, fontWeight: 600, cursor: person.status === 'verified' ? 'not-allowed' : 'pointer', opacity: person.status === 'verified' ? 0.5 : 1, fontFamily: 'Manrope, sans-serif' }}>
                   ✓ {t('admin.verify')}
                 </button>
-                <button
-                  onClick={() => handleSetStatus('rejected')}
-                  disabled={person.status === 'rejected'}
-                  style={{
-                    padding: '5px 12px', borderRadius: 8, border: '1px solid #fde8a0',
-                    background: '#fffbeb', color: '#92600a', fontSize: 12, fontWeight: 600,
-                    cursor: person.status === 'rejected' ? 'not-allowed' : 'pointer',
-                    opacity: person.status === 'rejected' ? 0.5 : 1,
-                  }}
-                >
+                <button onClick={() => handleSetStatus('rejected')} disabled={person.status === 'rejected'}
+                  style={{ padding: '5px 12px', borderRadius: 8, border: '1px solid #fde8a0', background: '#fffbeb', color: '#92600a', fontSize: 12, fontWeight: 600, cursor: person.status === 'rejected' ? 'not-allowed' : 'pointer', opacity: person.status === 'rejected' ? 0.5 : 1, fontFamily: 'Manrope, sans-serif' }}>
                   ✗ {t('admin.reject')}
                 </button>
-                <button
-                  onClick={handleDelete}
-                  style={{
-                    padding: '5px 12px', borderRadius: 8, border: '1px solid #fecdd3',
-                    background: '#fff1f2', color: '#9f1239', fontSize: 12, fontWeight: 600,
-                    cursor: 'pointer',
-                  }}
-                >
+                <button onClick={handleDelete}
+                  style={{ padding: '5px 12px', borderRadius: 8, border: '1px solid #fecdd3', background: '#fff1f2', color: '#9f1239', fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'Manrope, sans-serif' }}>
                   🗑
                 </button>
               </div>
@@ -239,16 +195,6 @@ export default function PersonModal({ personId, onClose }) {
           </div>
         )}
       </div>
-
-      <style>{`
-        @keyframes slideUp {
-          from { transform: translateY(20px); opacity: 0; }
-          to   { transform: translateY(0);    opacity: 1; }
-        }
-        @media (max-width: 640px) {
-          .person-modal-grid { grid-template-columns: 1fr !important; }
-        }
-      `}</style>
     </div>
   )
 }

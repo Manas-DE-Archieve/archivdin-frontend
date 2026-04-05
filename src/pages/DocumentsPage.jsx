@@ -6,6 +6,8 @@ import FileUploader from '../components/FileUploader';
 import { useAuth } from '../hooks/useAuth';
 import Pagination from '../components/Pagination';
 import DocumentViewerModal from '../components/DocumentViewerModal';
+import ConfirmDialog from '../components/ConfirmDialog';
+import { toast } from '../components/Toast';
 
 const PAGE_SIZE = 5;
 const TYPE_ICON = { pdf: '📕', md: '📝', txt: '📄' };
@@ -50,6 +52,9 @@ export default function DocumentsPage({ onOpenLogin }) {
   const [search, setSearch] = useState('');
   const [searchInput, setSearchInput] = useState('');
 
+  // Confirm dialog state
+  const [confirmDelete, setConfirmDelete] = useState(null); // { id }
+
   const load = useCallback(async (p = 1, currentScope = 'all', currentSearch = '') => {
     setLoading(true);
     try {
@@ -71,11 +76,21 @@ export default function DocumentsPage({ onOpenLogin }) {
     load(1, scope, search);
   }, [load, scope, search]);
 
-  const handleDelete = async (e, id) => {
+  const handleDeleteClick = (e, id) => {
     e.stopPropagation();
-    if (!window.confirm(t('documents.delete') + '?')) return;
-    await documentsApi.delete(id);
-    load(page, scope);
+    setConfirmDelete({ id });
+  };
+
+  const handleDeleteConfirm = async () => {
+    const { id } = confirmDelete;
+    setConfirmDelete(null);
+    try {
+      await documentsApi.delete(id);
+      toast.success('Документ удалён');
+      load(page, scope);
+    } catch {
+      toast.error('Не удалось удалить документ');
+    }
   };
 
   const handleViewDoc = async (id) => {
@@ -120,6 +135,18 @@ export default function DocumentsPage({ onOpenLogin }) {
   return (
     <>
       {viewingDoc && <DocumentViewerModal doc={viewingDoc} onClose={() => setViewingDoc(null)} />}
+
+      <ConfirmDialog
+        open={!!confirmDelete}
+        title="Удалить документ?"
+        message="Документ и все связанные с ним данные будут удалены безвозвратно."
+        confirmText="Удалить"
+        cancelText="Отмена"
+        variant="danger"
+        onConfirm={handleDeleteConfirm}
+        onCancel={() => setConfirmDelete(null)}
+      />
+
       <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 space-y-7">
 
         {/* Header */}
@@ -147,14 +174,10 @@ export default function DocumentsPage({ onOpenLogin }) {
           )}
         </div>
 
-        {/* Upload block — always visible */}
+        {/* Upload block */}
         <div className="card p-5 space-y-3">
           <p className="field-label">Загрузить документ</p>
-
-          {/* Lock banner for guests */}
           {!user && <LockBanner onOpenLogin={onOpenLogin} />}
-
-          {/* Uploader: visible always, disabled for guests */}
           <div className={!user ? 'pointer-events-none' : ''}>
             <FileUploader
               onUploaded={handleUploaded}
@@ -199,8 +222,6 @@ export default function DocumentsPage({ onOpenLogin }) {
             >
               Все документы
             </button>
-
-            {/* "My documents" tab — visible but locked for guests */}
             <button
               onClick={() => user ? setScope('my') : onOpenLogin?.()}
               className={`px-4 py-2 text-sm font-medium flex items-center gap-1.5 transition-colors ${
@@ -243,8 +264,8 @@ export default function DocumentsPage({ onOpenLogin }) {
                     <span className={`${statusInfo.class} shrink-0`}>{statusInfo.label}</span>
                     {user && (user.role !== 'user' || user.id === doc.uploaded_by) && (
                       <button
-                        onClick={(e) => handleDelete(e, doc.id)}
-                        className="shrink-0 w-7 h-7 flex items-center justify-center rounded-lg text-slate-300 hover:text-red-500 hover:bg-red-50"
+                        onClick={(e) => handleDeleteClick(e, doc.id)}
+                        className="shrink-0 w-7 h-7 flex items-center justify-center rounded-lg text-slate-300 hover:text-red-500 hover:bg-red-50 transition-colors"
                       >
                         ✕
                       </button>
