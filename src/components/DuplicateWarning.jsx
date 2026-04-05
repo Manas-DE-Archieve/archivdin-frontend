@@ -50,7 +50,7 @@ export default function DuplicateWarning({ persons, documents, mode = 'person', 
           <div className="space-y-2 max-h-64 overflow-y-auto pr-1 mb-5">
             {items.map(item => {
               const pct = Math.round(item.similarity_score * 100)
-              const scoreColor = pct >= 90 ? 'text-red-600' : pct >= 70 ? 'text-amber-600' : 'text-slate-500'
+              const scoreColor = pct >= 92 ? 'text-red-600' : pct >= 70 ? 'text-amber-600' : 'text-slate-500'
               return (
                 <div
                   key={item.id}

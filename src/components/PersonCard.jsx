@@ -7,18 +7,33 @@ const ArrowIcon = () => (<svg width="14" height="14" viewBox="0 0 24 24" fill="n
 
 export default function PersonCard({ person, onClick }) {
   const years = [person.birth_year, person.death_year].filter(Boolean).join('–')
+
   return (
     <div className="animate-fade-in" style={{ cursor: 'pointer' }} onClick={() => onClick?.(person.id)}>
       <div className="card-hover" style={{ padding: '18px 20px', display: 'flex', alignItems: 'center', gap: 16 }}>
-        <div style={{ width: 46, height: 46, borderRadius: 12, flexShrink: 0, background: 'linear-gradient(135deg, #e8f4fd, #d0e8f8)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid #c8dff0', color: '#4a7fa5' }}>
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        {/* Avatar */}
+        <div style={{
+          width: 46, height: 46, borderRadius: 12, flexShrink: 0,
+          background: 'linear-gradient(135deg, #e8f4fd, #d0e8f8)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          border: '1px solid #c8dff0', color: '#4a7fa5',
+        }}>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+          </svg>
         </div>
+
+        {/* Content */}
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, marginBottom: 6 }}>
             <h3 style={{ fontFamily: '"Playfair Display", serif', fontWeight: 600, fontSize: 15, color: '#1a2332', margin: 0, lineHeight: 1.4 }}>
               {person.full_name}
             </h3>
-            <VerifiedBadge status={person.status} similarityScore={null} />
+            {/* verifiedBy передаётся явно — AI или Human верификация */}
+            <VerifiedBadge
+              status={person.status}
+              verifiedBy={person.verified_by}
+            />
           </div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px 16px', fontSize: 12, color: '#7d95ab' }}>
             {years && <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><CalIcon />{years}</span>}
@@ -31,6 +46,7 @@ export default function PersonCard({ person, onClick }) {
             </p>
           )}
         </div>
+
         <div style={{ color: '#c5d5e5', flexShrink: 0 }}><ArrowIcon /></div>
       </div>
     </div>

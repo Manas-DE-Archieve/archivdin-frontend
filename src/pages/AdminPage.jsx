@@ -10,7 +10,7 @@ import { toast } from '../components/Toast';
 const PAGE_SIZE = 20;
 const USERS_PAGE_SIZE = 10;
 
-// ── Icon components (функции, не JSX-объект) ───────────────────────────────────
+// ── Icon components ────────────────────────────────────────────────────────────
 const IcoUser = () => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
@@ -55,8 +55,7 @@ const IcoWarn = () => (
 )
 const IcoLock = () => (
   <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-    <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+    <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
   </svg>
 )
 const IcoShield = () => (
@@ -76,14 +75,10 @@ const IcoSparkle = () => (
 )
 const IcoSpinner = () => (
   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" className="animate-spin">
-    <line x1="12" y1="2" x2="12" y2="6"/>
-    <line x1="12" y1="18" x2="12" y2="22"/>
-    <line x1="4.93" y1="4.93" x2="7.76" y2="7.76"/>
-    <line x1="16.24" y1="16.24" x2="19.07" y2="19.07"/>
-    <line x1="2" y1="12" x2="6" y2="12"/>
-    <line x1="18" y1="12" x2="22" y2="12"/>
-    <line x1="4.93" y1="19.07" x2="7.76" y2="16.24"/>
-    <line x1="16.24" y1="7.76" x2="19.07" y2="4.93"/>
+    <line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/>
+    <line x1="4.93" y1="4.93" x2="7.76" y2="7.76"/><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"/>
+    <line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/>
+    <line x1="4.93" y1="19.07" x2="7.76" y2="16.24"/><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"/>
   </svg>
 )
 
@@ -91,7 +86,7 @@ const IcoSpinner = () => (
 function SimilarityBar({ score }) {
   if (score == null) return <span className="text-[11px] text-slate-400">—</span>
   const pct = Math.round(score * 100)
-  const color = pct >= 90 ? '#ef4444' : pct >= 70 ? '#f59e0b' : '#22c55e'
+  const color = pct > 92 ? '#ef4444' : pct >= 70 ? '#f59e0b' : '#22c55e'
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
       <div style={{ width: 52, height: 5, borderRadius: 4, background: '#f1f5f9', overflow: 'hidden' }}>
@@ -130,39 +125,28 @@ function EmptyState({ IconComponent, title, sub }) {
   )
 }
 
-// ── Buttons ────────────────────────────────────────────────────────────────────
 function BtnVerify({ onClick, label = 'Верифицировать' }) {
   return (
-    <button
-      onClick={onClick}
-      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-xs font-semibold hover:bg-emerald-700 transition-colors"
-    >
+    <button onClick={onClick} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-xs font-semibold hover:bg-emerald-700 transition-colors">
       <IcoCheck />{label}
     </button>
   )
 }
 function BtnReject({ onClick, label = 'Отклонить' }) {
   return (
-    <button
-      onClick={onClick}
-      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-red-200 text-red-600 text-xs font-semibold hover:bg-red-50 transition-colors"
-    >
+    <button onClick={onClick} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-red-200 text-red-600 text-xs font-semibold hover:bg-red-50 transition-colors">
       <IcoX />{label}
     </button>
   )
 }
 function BtnRestore({ onClick }) {
   return (
-    <button
-      onClick={onClick}
-      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600 text-white text-xs font-semibold hover:bg-blue-700 transition-colors"
-    >
+    <button onClick={onClick} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600 text-white text-xs font-semibold hover:bg-blue-700 transition-colors">
       <IcoUpload />Восстановить
     </button>
   )
 }
 
-// ── Doc row ────────────────────────────────────────────────────────────────────
 function DocRow({ doc, accentColor, actions }) {
   return (
     <div className="card p-4 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
@@ -174,9 +158,7 @@ function DocRow({ doc, accentColor, actions }) {
           <VerifiedBadge status={doc.verification_status} similarityScore={doc.similarity_score} />
         </div>
         <div className="flex items-center gap-4 flex-wrap">
-          <span className="text-xs text-slate-400">
-            {new Date(doc.uploaded_at).toLocaleDateString('ru-RU')}
-          </span>
+          <span className="text-xs text-slate-400">{new Date(doc.uploaded_at).toLocaleDateString('ru-RU')}</span>
           <div className="flex items-center gap-1.5">
             <span className="text-[10px] text-slate-400 uppercase tracking-wide font-medium">Схожесть</span>
             <SimilarityBar score={doc.similarity_score} />
@@ -188,8 +170,8 @@ function DocRow({ doc, accentColor, actions }) {
   )
 }
 
-// ── Tabs ───────────────────────────────────────────────────────────────────────
-function PendingDocumentsTab() {
+// ── Tabs (принимают onCountChange для обновления счётчиков) ────────────────────
+function PendingDocumentsTab({ onCountChange }) {
   const [docs, setDocs] = useState([])
   const [loading, setLoading] = useState(true)
   const [total, setTotal] = useState(0)
@@ -200,8 +182,10 @@ function PendingDocumentsTab() {
     try {
       const { data } = await adminApi.listPendingDocuments({ page: p, limit: PAGE_SIZE })
       setDocs(data.items); setTotal(data.total); setPage(p)
+      // Обновляем счётчик в родителе
+      onCountChange('documents', data.total)
     } catch { setDocs([]) } finally { setLoading(false) }
-  }, [])
+  }, [onCountChange])
 
   useEffect(() => { load(1) }, [load])
 
@@ -222,12 +206,7 @@ function PendingDocumentsTab() {
     <div className="space-y-3">
       {docs.map(doc => (
         <DocRow key={doc.id} doc={doc} accentColor="#f59e0b"
-          actions={
-            <>
-              <BtnVerify onClick={() => handle(doc.id, 'verified')} />
-              <BtnReject onClick={() => handle(doc.id, 'rejected')} />
-            </>
-          }
+          actions={<><BtnVerify onClick={() => handle(doc.id, 'verified')} /><BtnReject onClick={() => handle(doc.id, 'rejected')} /></>}
         />
       ))}
       {Math.ceil(total / PAGE_SIZE) > 1 && (
@@ -237,7 +216,7 @@ function PendingDocumentsTab() {
   )
 }
 
-function AutoRejectedTab() {
+function AutoRejectedTab({ onCountChange }) {
   const [docs, setDocs] = useState([])
   const [loading, setLoading] = useState(true)
   const [total, setTotal] = useState(0)
@@ -248,8 +227,9 @@ function AutoRejectedTab() {
     try {
       const { data } = await adminApi.listAutoRejected({ page: p, limit: PAGE_SIZE })
       setDocs(data.items); setTotal(data.total); setPage(p)
+      onCountChange('autoRejected', data.total)
     } catch { setDocs([]) } finally { setLoading(false) }
-  }, [])
+  }, [onCountChange])
 
   useEffect(() => { load(1) }, [load])
 
@@ -271,17 +251,12 @@ function AutoRejectedTab() {
       <div className="flex items-start gap-2.5 px-3 py-2.5 rounded-xl bg-red-50 border border-red-100">
         <span className="text-red-500 mt-0.5 shrink-0"><IcoWarn /></span>
         <p className="text-xs text-red-700 font-medium leading-relaxed">
-          Эти документы авто-отклонены из-за схожести ≥ 98%. Вы можете восстановить их вручную.
+          Эти документы авто-отклонены из-за схожести ≥ 98%. Можно восстановить вручную.
         </p>
       </div>
       {docs.map(doc => (
         <DocRow key={doc.id} doc={doc} accentColor="#ef4444"
-          actions={
-            <>
-              <BtnRestore onClick={() => handle(doc.id, 'verified')} />
-              <BtnReject onClick={() => handle(doc.id, 'rejected')} label="Подтвердить" />
-            </>
-          }
+          actions={<><BtnRestore onClick={() => handle(doc.id, 'verified')} /><BtnReject onClick={() => handle(doc.id, 'rejected')} label="Подтвердить" /></>}
         />
       ))}
       {Math.ceil(total / PAGE_SIZE) > 1 && (
@@ -291,7 +266,7 @@ function AutoRejectedTab() {
   )
 }
 
-function PendingPersonsTab() {
+function PendingPersonsTab({ onCountChange }) {
   const { t } = useTranslation()
   const [persons, setPersons] = useState([])
   const [loading, setLoading] = useState(true)
@@ -303,8 +278,9 @@ function PendingPersonsTab() {
     try {
       const { data } = await personsApi.list({ status: 'pending', page: p, limit: PAGE_SIZE })
       setPersons(data.items); setTotal(data.total); setPage(p)
+      onCountChange('persons', data.total)
     } finally { setLoading(false) }
-  }, [])
+  }, [onCountChange])
 
   useEffect(() => { load(1) }, [load])
 
@@ -328,18 +304,12 @@ function PendingPersonsTab() {
           <div style={{ width: 3, minHeight: 48, borderRadius: 4, background: '#f59e0b', flexShrink: 0 }} />
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap mb-1">
-              <Link
-                to={`/persons/${p.id}`}
-                className="font-serif font-semibold text-slate-800 hover:text-primary-700 transition-colors"
-                onClick={e => e.stopPropagation()}
-              >
+              <Link to={`/persons/${p.id}`} className="font-serif font-semibold text-slate-800 hover:text-primary-700 transition-colors" onClick={e => e.stopPropagation()}>
                 {p.full_name}
               </Link>
               <VerifiedBadge status={p.status} similarityScore={null} />
             </div>
-            <p className="text-xs text-slate-400 truncate">
-              {[p.birth_year, p.region, p.charge].filter(Boolean).join(' · ')}
-            </p>
+            <p className="text-xs text-slate-400 truncate">{[p.birth_year, p.region, p.charge].filter(Boolean).join(' · ')}</p>
           </div>
           <div className="flex gap-2 shrink-0">
             <BtnVerify onClick={() => setStatus(p.id, 'verified')} label={t('admin.verify')} />
@@ -426,9 +396,7 @@ function UsersTab() {
                       {user.role === 'super_admin' && <option value="super_admin">Super Admin</option>}
                     </select>
                   </td>
-                  <td className="px-5 py-3 text-slate-500">
-                    {new Date(user.created_at).toLocaleDateString('ru-RU')}
-                  </td>
+                  <td className="px-5 py-3 text-slate-500">{new Date(user.created_at).toLocaleDateString('ru-RU')}</td>
                 </tr>
               ))
             }
@@ -436,11 +404,7 @@ function UsersTab() {
         </table>
       </div>
       {Math.ceil(total / USERS_PAGE_SIZE) > 1 && (
-        <Pagination
-          currentPage={page}
-          totalPages={Math.ceil(total / USERS_PAGE_SIZE)}
-          onPageChange={p => loadUsers(p, search)}
-        />
+        <Pagination currentPage={page} totalPages={Math.ceil(total / USERS_PAGE_SIZE)} onPageChange={p => loadUsers(p, search)} />
       )}
     </div>
   )
@@ -463,28 +427,16 @@ export default function AdminPage() {
   const [factsMsg, setFactsMsg] = useState('')
   const [factsOk, setFactsOk] = useState(true)
 
-  useEffect(() => {
-    Promise.allSettled([
-      personsApi.list({ status: 'pending', page: 1, limit: 1 }),
-      adminApi.listPendingDocuments({ page: 1, limit: 1 }),
-      adminApi.listAutoRejected({ page: 1, limit: 1 }),
-    ]).then(([p, d, ar]) => {
-      setCounts({
-        persons:      p.status  === 'fulfilled' ? (p.value.data.total  ?? 0) : 0,
-        documents:    d.status  === 'fulfilled' ? (d.value.data.total  ?? 0) : 0,
-        autoRejected: ar.status === 'fulfilled' ? (ar.value.data.total ?? 0) : 0,
-      })
-    })
+  // Вызывается из дочерних вкладок при каждой загрузке данных
+  const handleCountChange = useCallback((key, value) => {
+    setCounts(prev => ({ ...prev, [key]: value }))
   }, [])
 
   const handleGenerateFacts = async () => {
     setGeneratingFacts(true); setFactsMsg('')
-    try {
-      await factsApi.generate()
-      setFactsOk(true); setFactsMsg('Генерация запущена в фоне.')
-    } catch {
-      setFactsOk(false); setFactsMsg('Ошибка при запуске генерации.')
-    } finally { setGeneratingFacts(false) }
+    try { await factsApi.generate(); setFactsOk(true); setFactsMsg('Генерация запущена в фоне.') }
+    catch { setFactsOk(false); setFactsMsg('Ошибка при запуске генерации.') }
+    finally { setGeneratingFacts(false) }
   }
 
   if (!user || !['moderator', 'super_admin'].includes(user.role)) {
@@ -498,7 +450,12 @@ export default function AdminPage() {
 
   const totalPending = counts.persons + counts.documents
   const tabs = user.role === 'super_admin' ? [...TABS_CFG, SUPER_TAB] : TABS_CFG
-  const countMap = { persons: counts.persons, documents: counts.documents, auto_rejected: counts.autoRejected, users: 0 }
+  const countMap = {
+    persons:      counts.persons,
+    documents:    counts.documents,
+    auto_rejected: counts.autoRejected,
+    users:        0,
+  }
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 space-y-6">
@@ -529,9 +486,7 @@ export default function AdminPage() {
               <span className={factsOk ? 'text-emerald-500' : 'text-red-500'}>
                 {factsOk ? <IcoCheck /> : <IcoX />}
               </span>
-              <p className={`text-xs font-medium ${factsOk ? 'text-emerald-600' : 'text-red-600'}`}>
-                {factsMsg}
-              </p>
+              <p className={`text-xs font-medium ${factsOk ? 'text-emerald-600' : 'text-red-600'}`}>{factsMsg}</p>
             </div>
           )}
         </div>
@@ -559,15 +514,11 @@ export default function AdminPage() {
                 onClick={() => setActiveTab(tab.id)}
                 className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium whitespace-nowrap transition-colors border-b-2 -mb-px ${
                   isActive
-                    ? tab.danger
-                      ? 'border-red-500 text-red-600'
-                      : 'border-primary-500 text-primary-600'
+                    ? tab.danger ? 'border-red-500 text-red-600' : 'border-primary-500 text-primary-600'
                     : 'border-transparent text-slate-400 hover:text-slate-600'
                 }`}
               >
-                <span className={isActive ? '' : 'opacity-50'}>
-                  <tab.Icon />
-                </span>
+                <span className={isActive ? '' : 'opacity-50'}><tab.Icon /></span>
                 {tab.label}
                 {cnt > 0 && (
                   <span className={`inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold ${
@@ -581,9 +532,9 @@ export default function AdminPage() {
           })}
         </div>
 
-        {activeTab === 'persons'       && <PendingPersonsTab />}
-        {activeTab === 'documents'     && <PendingDocumentsTab />}
-        {activeTab === 'auto_rejected' && <AutoRejectedTab />}
+        {activeTab === 'persons'       && <PendingPersonsTab  onCountChange={handleCountChange} />}
+        {activeTab === 'documents'     && <PendingDocumentsTab onCountChange={handleCountChange} />}
+        {activeTab === 'auto_rejected' && <AutoRejectedTab    onCountChange={handleCountChange} />}
         {activeTab === 'users'         && <UsersTab />}
       </div>
     </div>
